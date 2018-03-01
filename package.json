@@ -1,0 +1,26 @@
+{
+  "name": "ville-puzzles",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "parcel src/index.html -d temp",
+    "build": "parcel build src/index.html",
+    "test": "mocha './src/**/*.test.js' --require babel-core/register"
+  },
+  "author": "Lauri Junkkari",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "eslint": "^4.17.0",
+    "eslint-plugin-compat": "^2.2.0",
+    "mocha": "^5.0.1"
+  },
+  "dependencies": {
+    "autoprefixer": "^7.2.5",
+    "babel-preset-env": "^1.6.1",
+    "jquery": "^3.3.1",
+    "parcel-bundler": "^1.6.2",
+    "postcss": "^6.0.17"
+  }
+}

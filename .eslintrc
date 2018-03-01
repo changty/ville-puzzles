@@ -1,0 +1,16 @@
+{
+  "env": {
+    "browser": true,
+    "es6": true,
+    "mocha": true,
+    "node": true
+  },
+  "plugins": ["compat"],
+  "extends": ["eslint:recommended"],
+  "rules": {
+    "compat/compat": "error"
+  },
+  "parserOptions": {
+    "sourceType": "module"
+  }
+}
