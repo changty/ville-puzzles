@@ -2,6 +2,7 @@ export class BasePuzzle {
   /**
    * @param {object} options
    */
+
   constructor(options = {}) {
     this.state = {
       running: false,
@@ -22,13 +23,7 @@ export class BasePuzzle {
     this.render = this.render.bind(this);
   }
 
-  submit(data) {
-    console.log(data);
-  }
-
   sendAnswer() {}
-
-  checkAnswer() {}
 
   setup() {
     this.parentEl = document.querySelector(this.elementSelectors.parent);
@@ -72,12 +67,12 @@ export class BasePuzzle {
       this.draw();
       window.requestAnimationFrame(this.render);
     } else if (!this.canvas) {
-      console.warn("no canvas defined");
+      console.warn("no canvas defined"); // eslint-disable-line no-console
     }
   }
 
   draw() {
-    console.warn("draw() not defined");
+    console.warn("draw() not defined"); // eslint-disable-line no-console
     this.state.running = false;
   }
 }
