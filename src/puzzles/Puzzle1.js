@@ -1,11 +1,13 @@
 import { BasePuzzle } from "./BasePuzzle";
 
 export class Puzzle1 extends BasePuzzle {
-  constructor(cipherMessage, setting, options) {
+  constructor(cipherMessage, setting, options = {}) {
     /**
      * @param {string} cipherMessage
      * @param {object} setting
+     * @param {object} options
      */
+
     super(options);
 
     this.cipherMessage = cipherMessage;
@@ -79,5 +81,20 @@ export class Puzzle1 extends BasePuzzle {
     if (idx < 0) idx += characterSet.length;
     else if (idx > characterSet.length - 1) idx -= characterSet.length;
     return characterSet[idx];
+  }
+
+  renderHTML() {
+    super.renderHTML();
+
+    this.renderElement("p", "puzzleDescription", this.description);
+    this.renderElement("p", "puzzleQuestion", this.question);
+    this.renderElement("p", "puzzleAnswer");
+
+    this.renderElement("input", "puzzleInput");
+    this.renderElement(
+      "button",
+      "puzzleSubmit",
+      "Tarkista"
+    ).onclick = this.submit;
   }
 }

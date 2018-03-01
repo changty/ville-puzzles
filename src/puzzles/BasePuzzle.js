@@ -11,11 +11,7 @@ export class BasePuzzle {
 
     this.elementSelectors = Object.assign(
       {
-        parent: "#puzzle",
-        name: "#puzzleName",
-        description: "#puzzleDescription",
-        question: "#puzzleQuestion",
-        canvas: "#puzzleCanvas"
+        parent: "#puzzle"
       },
       options.elementSelectors
     );
@@ -45,21 +41,18 @@ export class BasePuzzle {
     this.state.running = false;
   }
 
+  renderElement(type, id, inner) {
+    const newEl = document.createElement(type);
+    const oldEl = document.querySelector(`#${id}`);
+    newEl.id = id;
+    newEl.innerHTML = inner || "";
+    if (oldEl) this.parentEl.removeChild(oldEl);
+    this.parentEl.appendChild(newEl);
+    return newEl;
+  }
+
   renderHTML() {
-    // Name
-    this.parentEl.querySelector(
-      this.elementSelectors.name
-    ).innerHTML = this.name;
-
-    // Description
-    this.parentEl.querySelector(
-      this.elementSelectors.description
-    ).innerHTML = this.description;
-
-    // Question
-    this.parentEl.querySelector(
-      this.elementSelectors.question
-    ).innerHTML = this.question;
+    this.renderElement("h1", "puzzleName", this.name);
   }
 
   render() {
