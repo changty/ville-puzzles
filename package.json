@@ -8,8 +8,16 @@
     "build": "parcel build src/index.html",
     "test": "mocha './src/**/*.test.js' --require babel-core/register"
   },
-  "author": "Lauri Junkkari",
-  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/latenssi/ville-puzzles.git"
+  },
+  "author": "Lauri Junkkari <latenssi@gmail.com>",
+  "bugs": {
+    "url": "https://github.com/latenssi/ville-puzzles/issues"
+  },
+  "homepage": "https://github.com/latenssi/ville-puzzles#readme",
+  "browserslist": "> 1%, last 2 versions, Firefox ESR",
   "devDependencies": {
     "chai": "^4.1.2",
     "eslint": "^4.17.0",
@@ -19,7 +27,6 @@
   "dependencies": {
     "autoprefixer": "^7.2.5",
     "babel-preset-env": "^1.6.1",
-    "jquery": "^3.3.1",
     "parcel-bundler": "^1.6.2",
     "postcss": "^6.0.17"
   }
