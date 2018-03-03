@@ -29,44 +29,24 @@ export class Puzzle2 extends BasePuzzle {
     this.question = "";
 
     this.setting = {
+      rows: 10,
+      cols: 10,
       objects: [[1, 1, 301], [2, 5, 304], [3, 9, 302], [9, 6, 303]]
     };
 
-    // const rows = 10;
-    // const cols = 10;
-
-    // const matrix = Array(rows * cols)
-    //   .fill(null)
-    //   .map((_, idx) => {
-    //     const row_0 = idx / rows;
-    //     const col_0 = idx % rows;
-    //     return new Spot(
-    //       row_0,
-    //       col_0,
-    //       this.setting.objects.find(
-    //         o => o[0] === row_0 + 1 && o[1] === col_0 + 1
-    //       )
-    //     );
-    //   });
-
-    // console.log(matrix[0]);
-
-    this.state.matrix = Array(10)
-      .fill(null)
-      .map((_, row_0) =>
-        Array(10)
-          .fill(null)
-          .map(
-            (_, col_0) =>
-              new Spot(
-                row_0,
-                col_0,
-                this.setting.objects.find(
-                  o => o[0] === row_0 + 1 && o[1] === col_0 + 1
-                )
-              )
+    this.state.matrix = Array(this.setting.rows * this.setting.cols)
+      .fill(null) // Fill with nulls so we can use map()
+      .map((_, idx) => {
+        const row_0 = Math.floor(idx / this.setting.cols);
+        const col_0 = Math.floor(idx % this.setting.cols);
+        return new Spot(
+          row_0,
+          col_0,
+          this.setting.objects.find(
+            o => o[0] === row_0 + 1 && o[1] === col_0 + 1
           )
-      );
+        );
+      });
 
     this.submit = this.submit.bind(this);
     this.draw = this.draw.bind(this);
@@ -86,15 +66,14 @@ export class Puzzle2 extends BasePuzzle {
 
     this.renderElement("p", "puzzleDescription", this.description);
 
-    this.renderElement("canvas", "puzzleCanvas", null, canvas => {
-      this.canvas = canvas;
-      this.ctx = canvas.getContext("2d");
-      canvas.width = 300;
-      canvas.height = 300;
-      canvas.onmousemove = this.canvasMouseHover;
-      canvas.onmouseout = this.canvasMouseOut;
-      canvas.onclick = this.canvasClick;
-    });
+    this.canvas = this.renderElement("canvas", "puzzleCanvas");
+
+    this.ctx = this.canvas.getContext("2d");
+    this.canvas.width = 300;
+    this.canvas.height = 300;
+    this.canvas.onmousemove = this.canvasMouseHover;
+    this.canvas.onmouseout = this.canvasMouseOut;
+    this.canvas.onclick = this.canvasClick;
 
     this.renderElement("br", "puzzleSpacing");
 
@@ -113,24 +92,22 @@ export class Puzzle2 extends BasePuzzle {
   }
 
   renderMap() {
-    this.state.matrix.forEach(cols =>
-      cols.forEach(spot => {
-        spot.render(
-          this.ctx,
-          this.ctx.canvas.clientWidth / 10,
-          this.ctx.canvas.clientHeight / 10,
-          this.mouseX,
-          this.mouseY,
-          this.state.lastClickedSpot
-        );
-      })
-    );
+    this.state.matrix.forEach(spot => {
+      spot.render(
+        this.ctx,
+        this.ctx.canvas.clientWidth / this.setting.cols,
+        this.ctx.canvas.clientHeight / this.setting.rows,
+        this.mouseX,
+        this.mouseY,
+        this.state.lastClickedSpot
+      );
+    });
   }
 
   canvasMouseHover(e) {
     const rect = this.canvas.getBoundingClientRect();
-    this.mouseX = e.clientX - rect.left;
-    this.mouseY = e.clientY - rect.top;
+    this.mouseX = Math.floor(e.clientX - rect.left);
+    this.mouseY = Math.floor(e.clientY - rect.top);
   }
 
   canvasMouseOut() {
@@ -140,14 +117,12 @@ export class Puzzle2 extends BasePuzzle {
 
   canvasClick() {
     this.state.lastClickedSpot = null;
-    this.state.matrix.forEach(cols =>
-      cols.forEach(s => {
-        if (s.isMouseHovering(this.mouseX, this.mouseY)) {
-          this.state.lastClickedSpot = s;
-          console.log(`Clicked on ${s.toString()}`);
-        }
-      })
-    );
+    this.state.matrix.forEach(spot => {
+      if (spot.isMouseHovering(this.mouseX, this.mouseY)) {
+        this.state.lastClickedSpot = spot;
+        console.log(`Clicked on ${spot.toString()}`);
+      }
+    });
   }
 }
 
@@ -221,8 +196,11 @@ class Spot {
   }
 
   isMouseHovering(mouseX, mouseY) {
-    const [x, y, w, h] = this.rect;
-    return mouseX >= x && mouseX < x + h && mouseY >= y && mouseY < y + w;
+    if (mouseX > 0 && mouseY > 0) {
+      const [x, y, w, h] = this.rect;
+      return mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < y + h;
+    }
+    return false;
   }
 
   toString() {
