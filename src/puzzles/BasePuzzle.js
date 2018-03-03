@@ -23,11 +23,6 @@ export class BasePuzzle {
 
   setup() {
     this.parentEl = document.querySelector(this.elementSelectors.parent);
-    this.canvas = document.querySelector(this.elementSelectors.canvas);
-
-    if (this.canvas) {
-      this.ctx = this.canvas.getContext("2d");
-    }
 
     this.renderHTML();
   }
@@ -41,14 +36,15 @@ export class BasePuzzle {
     this.state.running = false;
   }
 
-  renderElement(type, id, inner) {
+  renderElement(type, id, inner, callback) {
     const newEl = document.createElement(type);
     const oldEl = document.querySelector(`#${id}`);
     newEl.id = id;
     newEl.innerHTML = inner || "";
     if (oldEl) this.parentEl.removeChild(oldEl);
     this.parentEl.appendChild(newEl);
-    return newEl;
+    if (typeof callback === "function") return callback(newEl);
+    else return newEl;
   }
 
   renderHTML() {
