@@ -2,8 +2,8 @@ export function randomChoice(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-export function cipher(message, key) {
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ";
+export function cipher(settings, message) {
+  const { characterSet, key } = settings;
   const keys = /([+-])(\d+)/g.exec(key);
   const factor = keys[1] === "-" ? -parseInt(keys[2]) : parseInt(keys[2]);
 
@@ -11,11 +11,11 @@ export function cipher(message, key) {
     .toUpperCase()
     .split("")
     .map(c => {
-      if (characters.indexOf(c) === -1) return c;
-      let idx = characters.indexOf(c) + factor;
-      if (idx < 0) idx += characters.length;
-      else if (idx > characters.length - 1) idx -= characters.length;
-      return characters[idx];
+      if (characterSet.indexOf(c) === -1) return c;
+      let idx = characterSet.indexOf(c) + factor;
+      if (idx < 0) idx += characterSet.length;
+      else if (idx > characterSet.length - 1) idx -= characterSet.length;
+      return characterSet[idx];
     })
     .join("");
 }

@@ -1,0 +1,32 @@
+span.correct {
+  color: green;
+}
+
+span.incorrect {
+  color: red
+}
+
+span.current-char {
+  font-weight: bold
+}
+
+#puzzleRing #characters {
+  margin-bottom: 1em;
+}
+
+.characterSet {
+  padding: 0 .12em 0 .12em;
+}
+
+span.current-char {
+  text-decoration: underline;
+  position: relative;
+}
+
+span.current-char::after {
+  content: "^";
+  position: absolute;
+  top: 1em;
+  left: 0;
+}
+

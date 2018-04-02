@@ -48,7 +48,6 @@ export class Puzzle2 extends BasePuzzle {
         );
       });
 
-    this.submit = this.submit.bind(this);
     this.draw = this.draw.bind(this);
     this.canvasMouseHover = this.canvasMouseHover.bind(this);
     this.canvasMouseOut = this.canvasMouseOut.bind(this);
@@ -67,13 +66,13 @@ export class Puzzle2 extends BasePuzzle {
     this.renderElement("p", "puzzleDescription", this.description);
 
     this.canvas = this.renderElement("canvas", "puzzleCanvas");
-
-    this.ctx = this.canvas.getContext("2d");
     this.canvas.width = 300;
     this.canvas.height = 300;
     this.canvas.onmousemove = this.canvasMouseHover;
     this.canvas.onmouseout = this.canvasMouseOut;
     this.canvas.onclick = this.canvasClick;
+
+    this.ctx = this.canvas.getContext("2d");
 
     this.renderElement("br", "puzzleSpacing");
 

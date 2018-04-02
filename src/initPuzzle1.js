@@ -1,43 +1,45 @@
-import { cipher, randomChoice } from "./lib/util";
-import { Puzzle1 } from "./puzzles";
+import { randomChoice } from "./lib/util";
+import { Puzzle1, makeCipherer } from "./puzzles";
 
 function init() {
-  const basicCharacterSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ";
+  const characterSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ";
 
-  const possibleSettingsForPuzzle1 = [
+  const possibleSettings = [
     {
       key: "+1",
-      desc: "yksi askel eteenpäin",
-      example: "A &#8594; B, B &#8594; C..., Ä &#8594; Ö, Ö &#8594; A",
-      characterSet: basicCharacterSet
+      keyDesc: "yksi askel eteenpäin",
+      keyExample: "A &#8594; B, B &#8594; C..., Ä &#8594; Ö, Ö &#8594; A",
+      characterSet
     },
     {
       key: "+2",
-      desc: "kaksi askelta eteenpäin",
-      example: "A &#8594; C, B &#8594; D..., Ä &#8594; A, Ö &#8594; B",
-      characterSet: basicCharacterSet
+      keyDesc: "kaksi askelta eteenpäin",
+      keyExample: "A &#8594; C, B &#8594; D..., Ä &#8594; A, Ö &#8594; B",
+      characterSet
     },
     {
       key: "-1",
-      desc: "yksi askel taaksepäin",
-      example: "A &#8594; Ö, B &#8594; A..., Ä &#8594; Å, Ö &#8594; Ä",
-      characterSet: basicCharacterSet
+      keyDesc: "yksi askel taaksepäin",
+      keyExample: "A &#8594; Ö, B &#8594; A..., Ä &#8594; Å, Ö &#8594; Ä",
+      characterSet
     },
     {
       key: "-2",
-      desc: "kaksi askelta taaksepäin",
-      example: "A &#8594; Ä, B &#8594; Ö..., Ä &#8594; Z, Ö &#8594; Å",
-      characterSet: basicCharacterSet
+      keyDesc: "kaksi askelta taaksepäin",
+      keyExample: "A &#8594; Ä, B &#8594; Ö..., Ä &#8594; Z, Ö &#8594; Å",
+      characterSet
     }
   ];
 
-  const possibleMessagesForPuzzle1 = ["HEI MAAILMA"];
+  const possibleMessages = ["HEI MAAILMA"];
 
-  const puzzleSetting = randomChoice(possibleSettingsForPuzzle1);
-  const puzzleOriginalMessage = randomChoice(possibleMessagesForPuzzle1);
-  const puzzleCipherMessage = cipher(puzzleOriginalMessage, puzzleSetting.key);
+  const puzzleSetting = randomChoice(possibleSettings);
+  const puzzleOriginalMessage = randomChoice(possibleMessages);
+  const puzzleCipherMessage = makeCipherer(puzzleSetting)(
+    puzzleOriginalMessage
+  );
 
-  new Puzzle1(puzzleCipherMessage, puzzleSetting);
+  return new Puzzle1(puzzleCipherMessage, puzzleSetting);
 }
 
 export default init;

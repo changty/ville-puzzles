@@ -1,9 +1,2 @@
 canvas { background: #eee; display: block; margin: 0 auto; }
 
-span.correct {
-  color: green;
-}
-
-span.incorrect {
-  color: red
-}
