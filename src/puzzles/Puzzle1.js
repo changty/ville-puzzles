@@ -140,9 +140,11 @@ export class Puzzle1 extends BasePuzzle {
 
     this.renderElement("p", "puzzleDescription", this.description);
 
+    this.renderElement("p", "puzzleQuestion", this.renderQuestion());
+
     this.renderElement("div", "puzzleRing", this.renderCipherRing());
 
-    this.renderElement("p", "puzzleQuestion", this.renderQuestion());
+    this.renderElement("p", "puzzleAnswerLabel", "Vastauksesi: ");
 
     this.renderElement(
       "p",
