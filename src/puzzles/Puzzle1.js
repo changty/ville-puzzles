@@ -1,6 +1,7 @@
 import { BasePuzzle } from "./BasePuzzle";
 
 import "./Puzzle1.css";
+import "./ring.css";
 
 export function makeCipherer(settings) {
   const { characterSet, key } = settings;
@@ -54,11 +55,16 @@ export class Puzzle1 extends BasePuzzle {
 
     this.cipherMessage = cipherMessage;
     this.setting = setting;
+
     this.state.currentCharIdx = 0;
-    this.state.selectedCharIdx = setting.characterSet.indexOf(cipherMessage[0]);
+    this.state.selectedCharIdx = 0;
     this.state.answer = "";
     this.state.done = false;
     this.state.checked = false;
+
+    this.ring = {
+      degreePerChar: 360 / setting.characterSet.length
+    };
 
     this.cipher = makeCipherer(setting);
 
@@ -98,10 +104,7 @@ export class Puzzle1 extends BasePuzzle {
   }
 
   checkCharacter(cipherChar, answerChar) {
-    if (cipherChar && answerChar && cipherChar === this.cipher(answerChar)) {
-      return true;
-    }
-    return false;
+    return cipherChar && answerChar && cipherChar === this.cipher(answerChar);
   }
 
   onPrevClick() {
@@ -129,9 +132,6 @@ export class Puzzle1 extends BasePuzzle {
       this.state.currentCharIdx += 1;
       this.state.answer += " ";
     }
-    this.state.selectedCharIdx = this.setting.characterSet.indexOf(
-      this.cipherMessage[this.state.currentCharIdx]
-    );
     this.renderHTML();
   }
 
@@ -144,30 +144,31 @@ export class Puzzle1 extends BasePuzzle {
 
     this.renderElement("p", "puzzleQuestion", this.renderQuestion());
 
+    // Render answer
     this.renderElement(
       "p",
       "puzzleAnswer",
       this.state.checked ? this.state.renderedAnswer : this.state.answer
     );
 
+    // Render "Tarkista"-button
     const checkAnswerButton = this.renderElement(
       "button",
       "puzzleSubmit",
       this.options["str-check-answer"]
     );
-
     if (!this.state.done || this.state.checked) {
       checkAnswerButton.disabled = true;
     } else {
       checkAnswerButton.onclick = this.submit.bind(this);
     }
 
+    // Render "Lähetä"-button
     const sendAnswerButton = this.renderElement(
       "button",
       "puzzleSend",
       this.options["str-send-answer"]
     );
-
     if (this.state.answerSent || !this.state.done || !this.state.checked) {
       sendAnswerButton.disabled = true;
     } else {
@@ -178,11 +179,11 @@ export class Puzzle1 extends BasePuzzle {
   renderQuestion() {
     return this.options["str-question"].replace(
       "{{cipherMessage}}",
-      this.renderCipherMessageHTML()
+      this.renderCipherMessageSpans()
     );
   }
 
-  renderCipherMessageHTML() {
+  renderCipherMessageSpans() {
     return this.cipherMessage
       .split("")
       .map(
@@ -194,27 +195,37 @@ export class Puzzle1 extends BasePuzzle {
       .join("");
   }
 
-  renderCharacterSet() {
+  renderCharacterSetList(degreePerChar) {
     return this.setting.characterSet
       .split("")
       .map(
         (c, idx) =>
-          `<span class="characterSet ${
+          `<li class="characterSet char-${idx} ${c} ${
             idx === this.state.selectedCharIdx ? "current-char" : ""
-          }">${c}</span>`
+          }" style="transform: rotateY(${idx *
+            degreePerChar}deg) translateZ(300px)">${c}</li>`
       )
       .join("");
   }
 
   renderCipherRing() {
+    const { currentCharIdx, selectedCharIdx } = this.state;
+    const { degreePerChar } = this.ring;
+
     const charSet = this.renderElement(
-      "div",
+      "ul",
       "characters",
-      this.renderCharacterSet(),
+      this.renderCharacterSetList(degreePerChar),
       null
     );
 
-    if (this.state.currentCharIdx >= this.cipherMessage.length) {
+    const ringWrapper = this.renderElement("div", "ringWrapper", charSet, null);
+
+    const rotation = selectedCharIdx * degreePerChar;
+
+    charSet.style.transform = `rotateY(${-rotation}deg)`;
+
+    if (currentCharIdx >= this.cipherMessage.length) {
       this.state.done = true;
     }
 
@@ -237,6 +248,12 @@ export class Puzzle1 extends BasePuzzle {
       selectButton.disabled = true;
     }
 
-    return [charSet, prevButton, nextButton, selectButton];
+    const controls = this.renderElement("div", "controls", [
+      prevButton,
+      nextButton,
+      selectButton
+    ]);
+
+    return [ringWrapper, controls];
   }
 }

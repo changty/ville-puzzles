@@ -11,19 +11,19 @@ span.current-char {
 }
 
 #puzzleRing #characters {
-  margin-bottom: 1em;
+  /* margin-bottom: 1em; */
 }
 
 .characterSet {
   padding: 0 .12em 0 .12em;
 }
 
-span.current-char {
+.current-char {
   text-decoration: underline;
   position: relative;
 }
 
-span.current-char::after {
+#puzzleQuestion .current-char::after {
   content: "^";
   position: absolute;
   top: 1em;
