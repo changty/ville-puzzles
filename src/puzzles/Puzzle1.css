@@ -10,10 +10,6 @@ span.current-char {
   font-weight: bold
 }
 
-#puzzleRing #characters {
-  /* margin-bottom: 1em; */
-}
-
 .characterSet {
   padding: 0 .12em 0 .12em;
 }

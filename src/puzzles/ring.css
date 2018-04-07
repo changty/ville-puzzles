@@ -43,35 +43,3 @@
 #puzzleRing #controls {
   margin-top: 60px;
 }
-
-/* 
-.char-0 { transform: rotateY(0deg) }
-.char-1 { transform: rotateY(10deg) }
-.char-2 { transform: rotateY(20deg) }
-.char-3 { transform: rotateY(30deg) }
-.char-4 { transform: rotateY(40deg) }
-.char-5 { transform: rotateY(50deg) }
-.char-6 { transform: rotateY(60deg) }
-.char-7 { transform: rotateY(70deg) }
-.char-8 { transform: rotateY(80deg) }
-.char-9 { transform: rotateY(90deg) }
-.char-10 { transform: rotateY(100deg) }
-.char-11 { transform: rotateY(15deg) }
-.char-12 { transform: rotateY(180deg) }
-.char-13 { transform: rotateY(195deg) }
-.char-14 { transform: rotateY(210deg) }
-.char-15 { transform: rotateY(225deg) }
-.char-16 { transform: rotateY(240deg) }
-.char-17 { transform: rotateY(255deg) }
-.char-18 { transform: rotateY(270deg) }
-.char-19 { transform: rotateY(285deg) }
-.char-20 { transform: rotateY(300deg) }
-.char-21 { transform: rotateY(315deg) }
-.char-22 { transform: rotateY(330deg) }
-.char-23 { transform: rotateY(345deg) }
-.char-24 { transform: rotateY(360deg) } */
-
-/* @-webkit-keyframes spin {
-	from { -webkit-transform: rotateY(0)}
-  to   { -webkit-transform: rotateY(-360deg)}
-} */

@@ -61,7 +61,7 @@ export class Puzzle1 extends BasePuzzle {
     this.state.answer = "";
     this.state.done = false;
     this.state.check = [];
-    this.state.checked = false;
+    this.state.submitted = false;
 
     this.ringRotationControl = 0;
     this.ringDegreePerChar = 360 / setting.characterSet.length;
@@ -77,16 +77,65 @@ export class Puzzle1 extends BasePuzzle {
     this.setup();
   }
 
+  setup() {
+    super.setup();
+    document.onkeydown = this.onKeyPress.bind(this);
+  }
+
+  onKeyPress(e) {
+    switch (e.key) {
+      case "ArrowLeft":
+        this.onPrevClick();
+        break;
+
+      case "ArrowRight":
+        this.onNextClick();
+        break;
+
+      case "Enter":
+        this.onSelectClick();
+        break;
+
+      case "Backspace":
+        this.onErase();
+        break;
+
+      default:
+        return; // exit this handler for other keys
+    }
+
+    e.preventDefault(); // prevent the default action (scroll / move caret)
+  }
+
   onSubmit() {
+    if (!this.canSubmit()) return;
     const check = this.checkAnswer(this.cipherMessage, this.state.answer);
-    this.setState({ check, checked: true }, () => {
+    this.setState({ check, submitted: true }, () => {
       this.updateAnswer();
       this.updateButtons();
     });
   }
 
   onSendAnswer() {
+    if (!this.canSend()) return;
     this.sendAnswer(this.updateButtons.bind(this));
+  }
+
+  onErase() {
+    if (!this.canErase()) return;
+
+    let { answer, currentCharIdx } = this.state;
+    answer = answer.slice(0, -1);
+    currentCharIdx -= 1;
+    while (this.cipherMessage[currentCharIdx] === " ") {
+      currentCharIdx -= 1;
+      answer = answer.slice(0, -1);
+    }
+    this.setState({ answer, currentCharIdx }, () => {
+      this.updateQuestion();
+      this.updateAnswer();
+      this.updateButtons();
+    });
   }
 
   onPrevClick() {
@@ -118,6 +167,8 @@ export class Puzzle1 extends BasePuzzle {
   }
 
   onSelectClick() {
+    if (!this.canSelect()) return;
+
     let { currentCharIdx, answer } = this.state;
     answer += this.setting.characterSet[this.state.selectedCharIdx];
     currentCharIdx += 1;
@@ -132,11 +183,50 @@ export class Puzzle1 extends BasePuzzle {
     });
   }
 
+  canSelect() {
+    return (
+      !this.state.submitted &&
+      this.state.answer.length < this.cipherMessage.length
+    );
+  }
+
+  canErase() {
+    return (
+      !this.state.submitted &&
+      this.state.answer.length > 0 &&
+      this.state.currentCharIdx > 0
+    );
+  }
+
+  canSubmit() {
+    return !this.state.submitted && this.state.answer.length > 0;
+  }
+
+  canSend() {
+    return this.state.submitted && !this.state.answerSent;
+  }
+
   updateRing() {
     const rotation = this.ringRotationControl * this.ringDegreePerChar;
+
+    // Update rotation
     document.querySelector(
       "#puzzleRing #ringWrapper #characters"
     ).style.transform = `rotateY(${-rotation}deg)`;
+
+    // Update selected class
+    // Use setTimeout so the class is set somewhat in sync with the animation
+    setTimeout(() => {
+      document
+        .querySelectorAll("#puzzleRing #ringWrapper #characters .characterSet")
+        .forEach((el, idx) => {
+          if (idx === this.state.selectedCharIdx) {
+            el.classList.add("current-char");
+          } else {
+            el.classList.remove("current-char");
+          }
+        });
+    }, 60);
   }
 
   updateQuestion() {
@@ -148,13 +238,11 @@ export class Puzzle1 extends BasePuzzle {
   }
 
   updateButtons() {
-    this.selectButton.disabled =
-      this.state.answer.length >= this.cipherMessage.length;
+    this.selectButton.disabled = !this.canSelect();
 
-    this.submitButton.disabled = this.state.checked;
+    this.submitButton.disabled = !this.canSubmit();
 
-    this.sendAnswerButton.disabled =
-      !this.state.checked || this.state.answerSent;
+    this.sendAnswerButton.disabled = !this.canSend();
   }
 
   checkAnswer(cipherMessage, answer) {
@@ -218,8 +306,8 @@ export class Puzzle1 extends BasePuzzle {
   }
 
   renderAnswer() {
-    const { answer, check, checked } = this.state;
-    return checked
+    const { answer, check, submitted } = this.state;
+    return submitted
       ? answer
           .split("")
           .map(
@@ -240,7 +328,9 @@ export class Puzzle1 extends BasePuzzle {
         .split("")
         .map(
           (c, idx) =>
-            `<li class="characterSet char-${idx}" style="transform: rotateY(${idx *
+            `<li class="characterSet char-${idx} ${
+              idx === this.state.selectedCharIdx ? "current-char" : ""
+            }" style="transform: rotateY(${idx *
               this.ringDegreePerChar}deg) translateZ(300px)">${c}</li>`
         )
         .join(""),
@@ -249,6 +339,12 @@ export class Puzzle1 extends BasePuzzle {
 
     const ringWrapper = this.renderElement("div", "ringWrapper", charSet, null);
 
+    const eraseButton = this.renderElement(
+      "button",
+      "eraseButton",
+      "_Poista_",
+      null
+    );
     const prevButton = this.renderElement("button", "prevButton", "<<<", null);
     const nextButton = this.renderElement("button", "nextButton", ">>>", null);
     const selectButton = this.renderElement(
@@ -258,11 +354,13 @@ export class Puzzle1 extends BasePuzzle {
       null
     );
 
+    eraseButton.onclick = this.onErase.bind(this);
     prevButton.onclick = this.onPrevClick.bind(this);
     nextButton.onclick = this.onNextClick.bind(this);
     selectButton.onclick = this.onSelectClick.bind(this);
 
     const controls = this.renderElement("div", "controls", [
+      eraseButton,
       prevButton,
       nextButton,
       selectButton
