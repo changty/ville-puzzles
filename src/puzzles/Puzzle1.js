@@ -238,10 +238,9 @@ export class Puzzle1 extends BasePuzzle {
   }
 
   updateButtons() {
+    this.eraseButton.disabled = !this.canErase();
     this.selectButton.disabled = !this.canSelect();
-
     this.submitButton.disabled = !this.canSubmit();
-
     this.sendAnswerButton.disabled = !this.canSend();
   }
 
@@ -354,6 +353,8 @@ export class Puzzle1 extends BasePuzzle {
       null
     );
 
+    eraseButton.disabled = true;
+
     eraseButton.onclick = this.onErase.bind(this);
     prevButton.onclick = this.onPrevClick.bind(this);
     nextButton.onclick = this.onNextClick.bind(this);
@@ -366,6 +367,7 @@ export class Puzzle1 extends BasePuzzle {
       selectButton
     ]);
 
+    this.eraseButton = eraseButton;
     this.selectButton = selectButton;
 
     return [ringWrapper, controls];
