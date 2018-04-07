@@ -14,7 +14,6 @@ export class BasePuzzle {
     this.options = Object.assign(defaultOptions, options);
 
     this.state = {
-      running: false,
       answer: null,
       answerSent: false
     };
@@ -27,31 +26,19 @@ export class BasePuzzle {
       },
       this.options.elementSelectors
     );
-
-    this.render = this.render.bind(this);
   }
 
-  submit() {}
+  onSubmit() {}
 
-  sendAnswer() {
+  sendAnswer(callback) {
     window.alert(`Vastaus "${this.state.answer}" lähetetty!`);
-    this.state.answerSent = true;
-    this.renderHTML();
+    this.setState({ answerSent: true }, callback);
   }
 
   setup() {
     this.parentEl = document.querySelector(this.elementSelectors.parent);
 
     this.renderHTML();
-  }
-
-  start() {
-    this.state.running = true;
-    window.requestAnimationFrame(this.render);
-  }
-
-  pause() {
-    this.state.running = false;
   }
 
   renderElement(type, id, inner, parent = this.parentEl) {
@@ -79,17 +66,9 @@ export class BasePuzzle {
     this.renderElement("h1", "puzzleName", this.name);
   }
 
-  render() {
-    if (this.state.running && this.canvas) {
-      this.draw();
-      window.requestAnimationFrame(this.render);
-    } else if (!this.canvas) {
-      console.warn("no canvas defined"); // eslint-disable-line no-console
-    }
-  }
-
-  draw() {
-    console.warn("draw() not defined"); // eslint-disable-line no-console
-    this.state.running = false;
+  setState(newState, callback) {
+    const oldState = this.state;
+    this.state = Object.assign({}, oldState, newState);
+    if (typeof callback === "function") callback();
   }
 }

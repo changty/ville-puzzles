@@ -60,11 +60,12 @@ export class Puzzle1 extends BasePuzzle {
     this.state.selectedCharIdx = 0;
     this.state.answer = "";
     this.state.done = false;
+    this.state.check = [];
     this.state.checked = false;
 
-    this.ring = {
-      degreePerChar: 360 / setting.characterSet.length
-    };
+    this.ringRotationControl = 0;
+    this.ringDegreePerChar = 360 / setting.characterSet.length;
+    this.ringOldRotation = 0;
 
     this.cipher = makeCipherer(setting);
 
@@ -76,24 +77,84 @@ export class Puzzle1 extends BasePuzzle {
     this.setup();
   }
 
-  submit() {
+  onSubmit() {
     const check = this.checkAnswer(this.cipherMessage, this.state.answer);
+    this.setState({ check, checked: true }, () => {
+      this.updateAnswer();
+      this.updateButtons();
+    });
+  }
 
-    function renderAnswer(answer) {
-      return answer
-        .split("")
-        .map(
-          (c, idx) =>
-            `<span class="${check[idx] ? "correct" : "incorrect"}">${c}</span>`
-        )
-        .join("");
+  onSendAnswer() {
+    this.sendAnswer(this.updateButtons.bind(this));
+  }
+
+  onPrevClick() {
+    let { selectedCharIdx } = this.state;
+
+    this.ringRotationControl -= 1;
+
+    if (selectedCharIdx <= 0) {
+      selectedCharIdx = this.setting.characterSet.length - 1;
+    } else {
+      selectedCharIdx -= 1;
     }
 
-    this.state.renderedAnswer = renderAnswer(this.state.answer);
+    this.setState({ selectedCharIdx }, this.updateRing.bind(this));
+  }
 
-    this.state.checked = true;
+  onNextClick() {
+    let { selectedCharIdx } = this.state;
 
-    this.renderHTML();
+    this.ringRotationControl += 1;
+
+    if (selectedCharIdx >= this.setting.characterSet.length - 1) {
+      selectedCharIdx = 0;
+    } else {
+      selectedCharIdx += 1;
+    }
+
+    this.setState({ selectedCharIdx }, this.updateRing.bind(this));
+  }
+
+  onSelectClick() {
+    let { currentCharIdx, answer } = this.state;
+    answer += this.setting.characterSet[this.state.selectedCharIdx];
+    currentCharIdx += 1;
+    while (this.cipherMessage[currentCharIdx] === " ") {
+      currentCharIdx += 1;
+      answer += " ";
+    }
+    this.setState({ answer, currentCharIdx }, () => {
+      this.updateQuestion();
+      this.updateAnswer();
+      this.updateButtons();
+    });
+  }
+
+  updateRing() {
+    const rotation = this.ringRotationControl * this.ringDegreePerChar;
+    document.querySelector(
+      "#puzzleRing #ringWrapper #characters"
+    ).style.transform = `rotateY(${-rotation}deg)`;
+  }
+
+  updateQuestion() {
+    document.querySelector("#puzzleQuestion").innerHTML = this.renderQuestion();
+  }
+
+  updateAnswer() {
+    document.querySelector("#puzzleAnswer").innerHTML = this.renderAnswer();
+  }
+
+  updateButtons() {
+    this.selectButton.disabled =
+      this.state.answer.length >= this.cipherMessage.length;
+
+    this.submitButton.disabled = this.state.checked;
+
+    this.sendAnswerButton.disabled =
+      !this.state.checked || this.state.answerSent;
   }
 
   checkAnswer(cipherMessage, answer) {
@@ -105,34 +166,6 @@ export class Puzzle1 extends BasePuzzle {
 
   checkCharacter(cipherChar, answerChar) {
     return cipherChar && answerChar && cipherChar === this.cipher(answerChar);
-  }
-
-  onPrevClick() {
-    if (this.state.selectedCharIdx <= 0) {
-      this.state.selectedCharIdx = this.setting.characterSet.length - 1;
-    } else {
-      this.state.selectedCharIdx -= 1;
-    }
-    this.renderHTML();
-  }
-
-  onNextClick() {
-    if (this.state.selectedCharIdx >= this.setting.characterSet.length - 1) {
-      this.state.selectedCharIdx = 0;
-    } else {
-      this.state.selectedCharIdx += 1;
-    }
-    this.renderHTML();
-  }
-
-  onSelectClick() {
-    this.state.answer += this.setting.characterSet[this.state.selectedCharIdx];
-    this.state.currentCharIdx += 1;
-    while (this.cipherMessage[this.state.currentCharIdx] === " ") {
-      this.state.currentCharIdx += 1;
-      this.state.answer += " ";
-    }
-    this.renderHTML();
   }
 
   renderHTML() {
@@ -147,89 +180,74 @@ export class Puzzle1 extends BasePuzzle {
     this.renderElement("p", "puzzleAnswerLabel", "Vastauksesi: ");
 
     // Render answer
-    this.renderElement(
-      "p",
-      "puzzleAnswer",
-      this.state.checked ? this.state.renderedAnswer : this.state.answer
-    );
+    this.renderElement("p", "puzzleAnswer");
 
     // Render "Tarkista"-button
-    const checkAnswerButton = this.renderElement(
+    this.submitButton = this.renderElement(
       "button",
       "puzzleSubmit",
       this.options["str-check-answer"]
     );
-    if (!this.state.done || this.state.checked) {
-      checkAnswerButton.disabled = true;
-    } else {
-      checkAnswerButton.onclick = this.submit.bind(this);
-    }
+    this.submitButton.onclick = this.onSubmit.bind(this);
+    this.submitButton.disabled = true;
 
     // Render "Lähetä"-button
-    const sendAnswerButton = this.renderElement(
+    this.sendAnswerButton = this.renderElement(
       "button",
       "puzzleSend",
       this.options["str-send-answer"]
     );
-    if (this.state.answerSent || !this.state.done || !this.state.checked) {
-      sendAnswerButton.disabled = true;
-    } else {
-      sendAnswerButton.onclick = this.sendAnswer.bind(this);
-    }
+    this.sendAnswerButton.onclick = this.onSendAnswer.bind(this);
+    this.sendAnswerButton.disabled = true;
   }
 
   renderQuestion() {
+    const { currentCharIdx } = this.state;
     return this.options["str-question"].replace(
       "{{cipherMessage}}",
-      this.renderCipherMessageSpans()
+      this.cipherMessage
+        .split("")
+        .map(
+          (c, idx) =>
+            `<span class="characterSet ${
+              idx === currentCharIdx ? "current-char" : ""
+            }">${c}</span>`
+        )
+        .join("")
     );
   }
 
-  renderCipherMessageSpans() {
-    return this.cipherMessage
-      .split("")
-      .map(
-        (c, idx) =>
-          `<span class="characterSet ${
-            idx === this.state.currentCharIdx ? "current-char" : ""
-          }">${c}</span>`
-      )
-      .join("");
-  }
-
-  renderCharacterSetList(degreePerChar) {
-    return this.setting.characterSet
-      .split("")
-      .map(
-        (c, idx) =>
-          `<li class="characterSet char-${idx} ${c} ${
-            idx === this.state.selectedCharIdx ? "current-char" : ""
-          }" style="transform: rotateY(${idx *
-            degreePerChar}deg) translateZ(300px)">${c}</li>`
-      )
-      .join("");
+  renderAnswer() {
+    const { answer, check, checked } = this.state;
+    return checked
+      ? answer
+          .split("")
+          .map(
+            (c, idx) =>
+              `<span class="${
+                check[idx] ? "correct" : "incorrect"
+              }">${c}</span>`
+          )
+          .join("")
+      : answer;
   }
 
   renderCipherRing() {
-    const { currentCharIdx, selectedCharIdx } = this.state;
-    const { degreePerChar } = this.ring;
-
     const charSet = this.renderElement(
       "ul",
       "characters",
-      this.renderCharacterSetList(degreePerChar),
+      this.setting.characterSet
+        .split("")
+        .map(
+          (c, idx) =>
+            `<li class="characterSet char-${idx}" style="transform: rotateY(${idx *
+              this.ringDegreePerChar}deg) translateZ(300px)">${c}</li>`
+        )
+        .join(""),
       null
     );
 
     const ringWrapper = this.renderElement("div", "ringWrapper", charSet, null);
-
-    const rotation = selectedCharIdx * degreePerChar;
-
-    charSet.style.transform = `rotateY(${-rotation}deg)`;
-
-    if (currentCharIdx >= this.cipherMessage.length) {
-      this.state.done = true;
-    }
 
     const prevButton = this.renderElement("button", "prevButton", "<<<", null);
     const nextButton = this.renderElement("button", "nextButton", ">>>", null);
@@ -240,21 +258,17 @@ export class Puzzle1 extends BasePuzzle {
       null
     );
 
-    if (!this.state.done) {
-      prevButton.onclick = this.onPrevClick.bind(this);
-      nextButton.onclick = this.onNextClick.bind(this);
-      selectButton.onclick = this.onSelectClick.bind(this);
-    } else {
-      prevButton.disabled = true;
-      nextButton.disabled = true;
-      selectButton.disabled = true;
-    }
+    prevButton.onclick = this.onPrevClick.bind(this);
+    nextButton.onclick = this.onNextClick.bind(this);
+    selectButton.onclick = this.onSelectClick.bind(this);
 
     const controls = this.renderElement("div", "controls", [
       prevButton,
       nextButton,
       selectButton
     ]);
+
+    this.selectButton = selectButton;
 
     return [ringWrapper, controls];
   }

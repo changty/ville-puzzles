@@ -23,6 +23,7 @@
   height: 48px;
   width: 48px;
   transform-style: preserve-3d;
+  transition: transform 0.2s;
 }
 
 #puzzleRing ul#characters li {
