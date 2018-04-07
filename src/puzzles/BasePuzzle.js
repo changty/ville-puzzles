@@ -19,6 +19,8 @@ export class BasePuzzle {
       answerSent: false
     };
 
+    this.name = options["str-name"];
+
     this.elementSelectors = Object.assign(
       {
         parent: "#puzzle"
