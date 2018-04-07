@@ -6,6 +6,10 @@ span.incorrect {
   color: red
 }
 
+span.current-char {
+  font-weight: bold
+}
+
 #puzzleRing #characters {
   /* margin-bottom: 1em; */
 }
@@ -14,12 +18,7 @@ span.incorrect {
   padding: 0 .12em 0 .12em;
 }
 
-<<<<<<< HEAD
-span.current-char {
-  font-weight: bold;
-=======
 .current-char {
->>>>>>> 74259673ce45d6fe1013bc38327d92c59b963288
   text-decoration: underline;
   position: relative;
 }
@@ -30,4 +29,3 @@ span.current-char {
   top: 1em;
   left: 0;
 }
-
