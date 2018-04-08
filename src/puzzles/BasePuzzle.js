@@ -2,7 +2,8 @@ const defaultOptions = {
   "str-your-answer": "Vastauksesi",
   "str-check-answer": "Tarkista",
   "str-send-answer": "Lähetä",
-  "str-select": "Valitse"
+  "str-select": "Valitse",
+  "str-erase": "Poista"
 };
 
 export class BasePuzzle {
@@ -18,7 +19,9 @@ export class BasePuzzle {
       answerSent: false
     };
 
-    this.name = options["str-name"];
+    this.html = {
+      name: options["str-name"]
+    };
 
     this.elementSelectors = Object.assign(
       {
@@ -63,7 +66,7 @@ export class BasePuzzle {
 
   renderHTML() {
     this.parentEl.innerHTML = "";
-    this.renderElement("h1", "puzzleName", this.name);
+    this.renderElement("h1", "puzzleName", this.html.name);
   }
 
   setState(newState, callback) {
