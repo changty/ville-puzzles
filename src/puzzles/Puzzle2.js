@@ -24,20 +24,19 @@ function indexToRowCol(cols, idx) {
   };
 }
 
+const defaultOptions = {
+  "str-name": "Majavakartta",
+  "str-description":
+    "Majavakartassa esineen paikka ilmaistaan kahdella suluissa olevalla numerolla. Ensin rivin numero ja sitten sarakkeen numero."
+};
+
 export class Puzzle2 extends BasePuzzle {
-  constructor(
-    setting,
-    options = {
-      "str-name": "Majavakartta",
-      "str-description":
-        "Majavakartassa esineen paikka ilmaistaan kahdella suluissa olevalla numerolla. Ensin rivin numero ja sitten sarakkeen numero."
-    }
-  ) {
+  constructor(setting, options = {}) {
     /**
      * @param {object} options
      */
 
-    super(options);
+    super(Object.assign(defaultOptions, options));
 
     this.setting = setting;
 
@@ -45,7 +44,8 @@ export class Puzzle2 extends BasePuzzle {
     this.onSpotClick = this.onSpotClick.bind(this);
     this.onAnswerChange = this.onAnswerChange.bind(this);
 
-    this.html.description = options["str-description"];
+    this.html.description = this.options["str-description"];
+    this.html.question = this.options["str-question"];
 
     this.grid = Array(this.setting.rows * this.setting.cols)
       .fill(null) // Fill with nulls so we can use map()
@@ -109,6 +109,8 @@ export class Puzzle2 extends BasePuzzle {
     this.renderElement("p", "puzzleDescription", this.html.description);
 
     this.renderElement("div", "puzzleGrid", this.renderGrid());
+
+    this.renderElement("p", "puzzleQuestion", this.html.question);
 
     this.renderElement("p", "puzzleAnswerLabel", "Vastauksesi: ");
 

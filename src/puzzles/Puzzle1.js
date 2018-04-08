@@ -2,8 +2,7 @@ import { BasePuzzle } from "./BasePuzzle";
 
 import "./Puzzle1.css";
 
-export function makeCipherer(settings) {
-  const { characterSet, key } = settings;
+export function makeCipherer({ characterSet, key }) {
   const keys = /([+-])(\d+)/g.exec(key);
   const factor = keys[1] === "-" ? -parseInt(keys[2]) : parseInt(keys[2]);
 
@@ -30,31 +29,26 @@ export function makeCipherer(settings) {
   };
 }
 
+const defaultOptions = {
+  "str-name": "Salakirjoitus",
+  "str-description": `
+    Majavat lähettävät tietoa erityistä salakirjoitusavainta käyttäen. 
+    Jokainen kirjain vaihdetaan aakkosissa {{keyDesc}} olevaan kirjaimeen. <br> 
+    Siis esim.. {{keyExample}}.`,
+  "str-question": `Vastaanotettu viesti: {{cipherText}} <br> 
+    <strong>Mikä oli viesti?</strong>`
+};
+
 export class Puzzle1 extends BasePuzzle {
-  constructor(
-    cipherMessage,
-    setting,
-    options = {
-      "str-name": "Salakirjoitus",
-      "str-description": `
-        Majavat lähettävät tietoa erityistä salakirjoitusavainta käyttäen. 
-        Jokainen kirjain vaihdetaan aakkosissa {{keyDesc}} olevaan kirjaimeen. <br> 
-        Siis esim.. {{keyExample}}.`,
-      "str-question": `Vastaanotettu viesti: {{cipherMessage}} <br> 
-        <strong>Mikä oli viesti?</strong>`
-    }
-  ) {
+  constructor(setting, options = {}) {
     /**
-     * @param {string} cipherMessage
      * @param {object} setting
      * @param {object} options
      */
-
-    super(options);
+    super(Object.assign(defaultOptions, options));
 
     this.setting = setting;
     this.cipher = makeCipherer(setting);
-    this.cipherMessage = cipherMessage;
     this.ringRotationControl = 0;
     this.ringDegreePerChar = 360 / setting.characterSet.length;
 
@@ -68,7 +62,7 @@ export class Puzzle1 extends BasePuzzle {
       submitted: false
     };
 
-    this.html.description = options["str-description"]
+    this.html.description = this.options["str-description"]
       .replace("{{keyDesc}}", setting.keyDesc)
       .replace("{{keyExample}}", setting.keyExample);
 
@@ -80,11 +74,11 @@ export class Puzzle1 extends BasePuzzle {
     document.onkeydown = this.onKeyPress.bind(this);
   }
 
-  checkAnswer(cipherMessage, answer) {
+  checkAnswer(cipherText, answer) {
     return answer
       .toUpperCase()
       .split("")
-      .map((c, idx) => this.checkCharacter(cipherMessage[idx], c));
+      .map((c, idx) => this.checkCharacter(cipherText[idx], c));
   }
 
   checkCharacter(cipherChar, answerChar) {
@@ -94,7 +88,8 @@ export class Puzzle1 extends BasePuzzle {
   onSubmit() {
     if (!this.canSubmit()) return;
     const { answer } = this.state;
-    const check = this.checkAnswer(this.cipherMessage, answer);
+    const { cipherText } = this.setting;
+    const check = this.checkAnswer(cipherText, answer);
     this.setState({ check, submitted: true });
   }
 
@@ -105,11 +100,12 @@ export class Puzzle1 extends BasePuzzle {
 
   onPrev() {
     let { ringRotation, selectedCharIdx } = this.state;
+    const { characterSet } = this.setting;
 
     ringRotation -= 1;
 
     if (selectedCharIdx <= 0) {
-      selectedCharIdx = this.setting.characterSet.length - 1;
+      selectedCharIdx = characterSet.length - 1;
     } else {
       selectedCharIdx -= 1;
     }
@@ -119,10 +115,11 @@ export class Puzzle1 extends BasePuzzle {
 
   onNext() {
     let { ringRotation, selectedCharIdx } = this.state;
+    const { characterSet } = this.setting;
 
     ringRotation += 1;
 
-    if (selectedCharIdx >= this.setting.characterSet.length - 1) {
+    if (selectedCharIdx >= characterSet.length - 1) {
       selectedCharIdx = 0;
     } else {
       selectedCharIdx += 1;
@@ -133,26 +130,34 @@ export class Puzzle1 extends BasePuzzle {
 
   onErase() {
     if (!this.canErase()) return;
+
     let { answer, currentCharIdx } = this.state;
+    const { cipherText } = this.setting;
+
     answer = answer.slice(0, -1);
     currentCharIdx -= 1;
-    while (this.cipherMessage[currentCharIdx] === " ") {
+    while (cipherText[currentCharIdx] === " ") {
       currentCharIdx -= 1;
       answer = answer.slice(0, -1);
     }
+
     this.setState({ answer, currentCharIdx });
   }
 
   onSelect() {
     if (!this.canSelect()) return;
+
     const { selectedCharIdx } = this.state;
     let { currentCharIdx, answer } = this.state;
-    answer += this.setting.characterSet[selectedCharIdx];
+    const { characterSet, cipherText } = this.setting;
+
+    answer += characterSet[selectedCharIdx];
     currentCharIdx += 1;
-    while (this.cipherMessage[currentCharIdx] === " ") {
+    while (cipherText[currentCharIdx] === " ") {
       currentCharIdx += 1;
       answer += " ";
     }
+
     this.setState({ answer, currentCharIdx });
   }
 
@@ -183,7 +188,9 @@ export class Puzzle1 extends BasePuzzle {
 
   canSelect() {
     const { answer, submitted } = this.state;
-    return !submitted && answer.length < this.cipherMessage.length;
+    const { cipherText } = this.setting;
+
+    return !submitted && answer.length < cipherText.length;
   }
 
   canErase() {
@@ -286,9 +293,10 @@ export class Puzzle1 extends BasePuzzle {
 
   renderQuestion() {
     const { currentCharIdx } = this.state;
+    const { cipherText } = this.setting;
     return this.options["str-question"].replace(
-      "{{cipherMessage}}",
-      this.cipherMessage
+      "{{cipherText}}",
+      cipherText
         .split("")
         .map(
           (c, idx) =>
@@ -317,11 +325,12 @@ export class Puzzle1 extends BasePuzzle {
 
   renderCipherRing() {
     const { selectedCharIdx } = this.state;
+    const { characterSet } = this.setting;
 
     const charSet = this.renderElement(
       "ul",
       "characters",
-      this.setting.characterSet
+      characterSet
         .split("")
         .map(
           (c, idx) =>
