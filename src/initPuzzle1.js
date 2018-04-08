@@ -30,7 +30,7 @@ function init() {
   const puzzleSetting = randomChoice(possibleSettings);
   puzzleSetting.characterSet = characterSet;
 
-  const possibleMessages = ["HEI MAAILMA"];
+  const possibleMessages = ["HEI MAAILMA", "JS ROKKAA", "YLIOPISTO ON PARAS"];
 
   puzzleSetting.cipherText = makeCipherer(puzzleSetting)(
     randomChoice(possibleMessages)
