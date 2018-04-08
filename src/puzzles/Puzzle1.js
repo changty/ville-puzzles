@@ -1,7 +1,6 @@
 import { BasePuzzle } from "./BasePuzzle";
 
 import "./Puzzle1.css";
-import "./ring.css";
 
 export function makeCipherer(settings) {
   const { characterSet, key } = settings;

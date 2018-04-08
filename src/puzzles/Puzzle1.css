@@ -32,6 +32,7 @@ span.current-char {
   top: 30px; 
   text-align: center;
   margin-bottom: 40px;
+  width: 600px;
 }
 
 #ringWrapper {
