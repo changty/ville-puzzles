@@ -265,7 +265,7 @@ export class Puzzle1 extends BasePuzzle {
 
     this.renderElement("div", "puzzleRing", this.renderCipherRing());
 
-    this.renderElement("p", "puzzleAnswerLabel", "Vastauksesi: ");
+    this.renderElement("p", "puzzleAnswerLabel", "Vastauksesi:");
 
     // Render answer
     this.renderElement("p", "puzzleAnswer");

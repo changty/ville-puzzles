@@ -1,36 +1,86 @@
 import { BasePuzzle } from "./BasePuzzle";
 
+const defaultOptions = {
+  "str-name": "Drag & Drop"
+};
+
 export class Puzzle3 extends BasePuzzle {
-  constructor(options) {
+  constructor(setting, options) {
     /**
+     * @param {object} setting
      * @param {object} options
      */
-    super(options);
+    super(Object.assign(defaultOptions, options));
 
-    this.name = "";
-    this.description = "";
-    this.question = "";
+    this.state.submitted = false;
 
-    this.setting = {};
+    // this.name = "";
+    // this.description = "";
+    // this.question = "";
+
+    // this.html.description = this.options["str-description"];
+    // this.html.question = this.options["str-question"];
+
+    this.setting = setting;
 
     this.setup();
   }
 
-  submit() {}
-
   checkAnswer() {}
+
+  onSubmit() {
+    if (!this.canSubmit()) return;
+    this.setState({ submitted: true });
+  }
+
+  onSendAnswer() {
+    if (!this.canSend()) return;
+    this.sendAnswer();
+  }
+
+  canSubmit() {
+    const { submitted } = this.state;
+    return !submitted;
+  }
+
+  canSend() {
+    const { answerSent } = this.state;
+    return !answerSent;
+  }
+
+  updateView() {
+    super.updateView();
+
+    // this.updateAnswer();
+    this.updateButtons();
+  }
+
+  updateButtons() {
+    this.submitButton.disabled = !this.canSubmit();
+    this.sendAnswerButton.disabled = !this.canSend();
+  }
 
   renderHTML() {
     super.renderHTML();
 
-    this.renderElement("p", "puzzleDescription", this.description);
-
-    this.renderElement(
+    // Render "Tarkista"-button
+    this.submitButton = this.renderElement(
       "button",
       "puzzleSubmit",
-      "Tarkista"
-    ).onclick = this.submit;
+      this.options["str-check-answer"]
+    );
+    this.submitButton.onclick = this.onSubmit.bind(this);
+    this.submitButton.disabled = true;
 
-    this.start();
+    // Render "Lähetä"-button
+    this.sendAnswerButton = this.renderElement(
+      "button",
+      "puzzleSend",
+      this.options["str-send-answer"]
+    );
+    this.sendAnswerButton.onclick = this.onSendAnswer.bind(this);
+    this.sendAnswerButton.disabled = true;
+
+    this.updateView();
   }
 }
