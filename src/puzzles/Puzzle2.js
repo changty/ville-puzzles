@@ -19,8 +19,8 @@ const objectTypes = {
 
 function indexToRowCol(cols, idx) {
   return {
-    row: Math.floor(idx / cols),
-    col: Math.floor(idx % cols)
+    col: Math.floor(idx % cols),
+    row: Math.floor(idx / cols)
   };
 }
 
@@ -154,12 +154,11 @@ class Spot {
      * @param {number} col_0 - 0-indexed col
      * @param {number} objectType
      */
+    this.col_0 = col_0;
+    this.col = col_0 + 1; // Human readable coordinate in 1-indexed system
 
     this.row_0 = row_0;
     this.row = row_0 + 1; // Human readable coordinate in 1-indexed system
-
-    this.col_0 = col_0;
-    this.col = col_0 + 1; // Human readable coordinate in 1-indexed system
 
     this.objectType = Array.isArray(objectType)
       ? objectType[2]
@@ -169,12 +168,29 @@ class Spot {
   renderHTML({ onClick }) {
     const el = document.createElement("div");
     el.className = "spot";
+    el.classList.add("col-" + this.col);
+    el.classList.add("row-" + this.row);
     if (this.objectType) el.classList.add(objectTypes[this.objectType]);
     else el.classList.add("empty");
-    el.style.gridRow = this.row;
     el.style.gridColumn = this.col;
+    el.style.gridRow = this.row;
     el.innerHTML = this.objectType ? objectTypes[this.objectType] : "&bull;";
+
+    if (this.row === 1)
+      el.appendChild(this.renderIndexingNumber("col", this.col));
+
+    if (this.col === 1)
+      el.appendChild(this.renderIndexingNumber("row", this.row));
+
     el.onclick = e => onClick(e, this);
+    return el;
+  }
+
+  renderIndexingNumber(type, number) {
+    const el = document.createElement("span");
+    el.className = "indexingNumber";
+    el.classList.add(type);
+    el.innerHTML = number;
     return el;
   }
 
