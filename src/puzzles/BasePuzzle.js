@@ -15,7 +15,7 @@ export class BasePuzzle {
     this.options = Object.assign(defaultOptions, options);
 
     this.state = {
-      answer: null,
+      answer: "",
       answerSent: false
     };
 

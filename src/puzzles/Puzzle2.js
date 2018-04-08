@@ -1,5 +1,7 @@
 import { BasePuzzle } from "./BasePuzzle";
 
+import "./Puzzle2.css";
+
 const objectTypes = {
   101: "riverTopBot",
   102: "riverLeftRight",
@@ -15,113 +17,131 @@ const objectTypes = {
   304: "mushroom"
 };
 
+function indexToRowCol(cols, idx) {
+  return {
+    row: Math.floor(idx / cols),
+    col: Math.floor(idx % cols)
+  };
+}
+
 export class Puzzle2 extends BasePuzzle {
-  constructor(options) {
+  constructor(
+    setting,
+    options = {
+      "str-name": "Majavakartta",
+      "str-description":
+        "Majavakartassa esineen paikka ilmaistaan kahdella suluissa olevalla numerolla. Ensin rivin numero ja sitten sarakkeen numero."
+    }
+  ) {
     /**
      * @param {object} options
      */
+
     super(options);
 
-    this.name = "Majavakartta";
+    this.setting = setting;
 
-    this.description =
-      "Majavakartassa esineen paikka ilmaistaan kahdella suluissa olevalla numerolla. Ensin rivin numero ja sitten sarakkeen numero.";
-    this.question = "";
+    this.indexToRowCol = indexToRowCol.bind(null, setting.cols);
+    this.onSpotClick = this.onSpotClick.bind(this);
+    this.onAnswerChange = this.onAnswerChange.bind(this);
 
-    this.setting = {
-      rows: 10,
-      cols: 10,
-      objects: [[1, 1, 301], [2, 5, 304], [3, 9, 302], [9, 6, 303]]
-    };
+    this.html.description = options["str-description"];
 
-    this.state.matrix = Array(this.setting.rows * this.setting.cols)
+    this.grid = Array(this.setting.rows * this.setting.cols)
       .fill(null) // Fill with nulls so we can use map()
       .map((_, idx) => {
-        const row_0 = Math.floor(idx / this.setting.cols);
-        const col_0 = Math.floor(idx % this.setting.cols);
+        const rowCol = this.indexToRowCol(idx);
         return new Spot(
-          row_0,
-          col_0,
+          rowCol.row,
+          rowCol.col,
           this.setting.objects.find(
-            o => o[0] === row_0 + 1 && o[1] === col_0 + 1
+            o => o[0] === rowCol.row + 1 && o[1] === rowCol.col + 1
           )
         );
       });
 
-    this.draw = this.draw.bind(this);
-    this.canvasMouseHover = this.canvasMouseHover.bind(this);
-    this.canvasMouseOut = this.canvasMouseOut.bind(this);
-    this.canvasClick = this.canvasClick.bind(this);
-
     this.setup();
   }
 
-  submit() {}
+  onSendAnswer() {
+    if (!this.canSend()) return;
+    this.sendAnswer();
+  }
 
-  checkAnswer() {}
+  onSpotClick(e, spot) {
+    this.onAnswerChange(null, `rivi: ${spot.row}, sarake: ${spot.col}`);
+  }
+
+  onAnswerChange(e, newAnswer) {
+    if (!this.canEditAnswer()) return;
+    this.setState({ answer: e ? e.target.value : newAnswer || "" });
+  }
+
+  canSend() {
+    const { answer, answerSent } = this.state;
+    return !answerSent && answer.length > 0;
+  }
+
+  canEditAnswer() {
+    const { answerSent } = this.state;
+    return !answerSent;
+  }
+
+  updateView() {
+    super.updateView();
+
+    this.updateAnswer();
+    this.updateButtons();
+  }
+
+  updateButtons() {
+    this.sendAnswerButton.disabled = !this.canSend();
+  }
+
+  updateAnswer() {
+    this.textArea.value = this.state.answer;
+    this.textArea.disabled = !this.canEditAnswer();
+  }
 
   renderHTML() {
     super.renderHTML();
 
-    this.renderElement("p", "puzzleDescription", this.description);
+    this.renderElement("p", "puzzleDescription", this.html.description);
 
-    this.canvas = this.renderElement("canvas", "puzzleCanvas");
-    this.canvas.width = 300;
-    this.canvas.height = 300;
-    this.canvas.onmousemove = this.canvasMouseHover;
-    this.canvas.onmouseout = this.canvasMouseOut;
-    this.canvas.onclick = this.canvasClick;
+    this.renderElement("div", "puzzleGrid", this.renderGrid());
 
-    this.ctx = this.canvas.getContext("2d");
+    this.renderElement("p", "puzzleAnswerLabel", "Vastauksesi: ");
 
-    this.renderElement("br", "puzzleSpacing");
+    this.renderElement("div", "puzzleInput", this.renderInputForm());
 
-    this.renderElement(
+    // Render "Lähetä"-button
+    this.sendAnswerButton = this.renderElement(
       "button",
-      "puzzleSubmit",
-      "Tarkista"
-    ).onclick = this.submit;
+      "puzzleSend",
+      this.options["str-send-answer"]
+    );
+    this.sendAnswerButton.onclick = this.onSendAnswer.bind(this);
+    this.sendAnswerButton.disabled = true;
 
-    this.start();
+    this.updateView();
   }
 
-  draw() {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.renderMap();
+  renderGrid() {
+    const gridElements = this.grid.map(spot =>
+      spot.renderHTML({
+        onClick: this.onSpotClick
+      })
+    );
+
+    return this.renderElement("div", "gridWrapper", gridElements, null);
   }
 
-  renderMap() {
-    this.state.matrix.forEach(spot => {
-      spot.render(
-        this.ctx,
-        this.ctx.canvas.clientWidth / this.setting.cols,
-        this.ctx.canvas.clientHeight / this.setting.rows,
-        this.mouseX,
-        this.mouseY,
-        this.state.lastClickedSpot
-      );
-    });
-  }
-
-  canvasMouseHover(e) {
-    const rect = this.canvas.getBoundingClientRect();
-    this.mouseX = Math.floor(e.clientX - rect.left);
-    this.mouseY = Math.floor(e.clientY - rect.top);
-  }
-
-  canvasMouseOut() {
-    this.mouseX = -1;
-    this.mouseY = -1;
-  }
-
-  canvasClick() {
-    this.state.lastClickedSpot = null;
-    this.state.matrix.forEach(spot => {
-      if (spot.isMouseHovering(this.mouseX, this.mouseY)) {
-        this.state.lastClickedSpot = spot;
-        console.log(`Clicked on ${spot.toString()}`);
-      }
-    });
+  renderInputForm() {
+    const textArea = document.createElement("textarea");
+    textArea.onchange = this.onAnswerChange;
+    textArea.onkeyup = this.onAnswerChange;
+    this.textArea = textArea;
+    return this.renderElement("form", "inputForm", [textArea], null);
   }
 }
 
@@ -144,62 +164,16 @@ class Spot {
       : typeof objectType === "number" ? objectType : null;
   }
 
-  render(ctx, w, h, mouseX, mouseY, lastClickedSpot) {
-    const x = (this.x = this.col_0 * w);
-    const y = (this.y = this.row_0 * h);
-    this.rect = [x, y, w, h];
-
-    if (this.isMouseHovering(mouseX, mouseY)) {
-      ctx.strokeStyle = "#000000";
-      ctx.strokeRect(...this.rect);
-    }
-
-    if (
-      lastClickedSpot &&
-      lastClickedSpot.row === this.row &&
-      lastClickedSpot.col === this.col
-    ) {
-      ctx.strokeStyle = "#AAAAAA";
-      ctx.strokeRect(...this.rect);
-    }
-
-    switch (this.objectType) {
-      case 301:
-        // Lake
-        ctx.fillStyle = "#0000FF";
-        ctx.fillRect(...this.rect);
-        break;
-      case 302:
-        // Tree
-        ctx.fillStyle = "#00FF00";
-        ctx.fillRect(...this.rect);
-        break;
-      case 303:
-        // Treestump
-        ctx.fillStyle = "#9fc600";
-        ctx.fillRect(...this.rect);
-        break;
-      case 304:
-        // Mushroom
-        ctx.fillStyle = "#b26e1a";
-        ctx.fillRect(...this.rect);
-        break;
-      default:
-        ctx.fillStyle = "#aaaaaa";
-        ctx.beginPath();
-        ctx.arc(x + w / 2, y + h / 2, 5, 0, Math.PI + Math.PI * 4 / 2);
-        ctx.fill();
-    }
-
-    ctx.fillStyle = "#000000";
-  }
-
-  isMouseHovering(mouseX, mouseY) {
-    if (mouseX > 0 && mouseY > 0) {
-      const [x, y, w, h] = this.rect;
-      return mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < y + h;
-    }
-    return false;
+  renderHTML({ onClick }) {
+    const el = document.createElement("div");
+    el.className = "spot";
+    if (this.objectType) el.classList.add(objectTypes[this.objectType]);
+    else el.classList.add("empty");
+    el.style.gridRow = this.row;
+    el.style.gridColumn = this.col;
+    el.innerHTML = this.objectType ? objectTypes[this.objectType] : "&bull;";
+    el.onclick = e => onClick(e, this);
+    return el;
   }
 
   toString() {

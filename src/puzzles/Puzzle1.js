@@ -81,29 +81,15 @@ export class Puzzle1 extends BasePuzzle {
     document.onkeydown = this.onKeyPress.bind(this);
   }
 
-  onKeyPress(e) {
-    switch (e.key) {
-      case "ArrowLeft":
-        this.onPrev();
-        break;
+  checkAnswer(cipherMessage, answer) {
+    return answer
+      .toUpperCase()
+      .split("")
+      .map((c, idx) => this.checkCharacter(cipherMessage[idx], c));
+  }
 
-      case "ArrowRight":
-        this.onNext();
-        break;
-
-      case "Enter":
-        this.onSelect();
-        break;
-
-      case "Backspace":
-        this.onErase();
-        break;
-
-      default:
-        return; // exit this handler for other keys
-    }
-
-    e.preventDefault(); // prevent the default action (scroll / move caret)
+  checkCharacter(cipherChar, answerChar) {
+    return cipherChar && answerChar && cipherChar === this.cipher(answerChar);
   }
 
   onSubmit() {
@@ -169,6 +155,31 @@ export class Puzzle1 extends BasePuzzle {
       answer += " ";
     }
     this.setState({ answer, currentCharIdx });
+  }
+
+  onKeyPress(e) {
+    switch (e.key) {
+      case "ArrowLeft":
+        this.onPrev();
+        break;
+
+      case "ArrowRight":
+        this.onNext();
+        break;
+
+      case "Enter":
+        this.onSelect();
+        break;
+
+      case "Backspace":
+        this.onErase();
+        break;
+
+      default:
+        return; // exit this handler for other keys
+    }
+
+    e.preventDefault(); // prevent the default action (scroll / move caret)
   }
 
   canSelect() {
@@ -237,17 +248,6 @@ export class Puzzle1 extends BasePuzzle {
     this.selectButton.disabled = !this.canSelect();
     this.submitButton.disabled = !this.canSubmit();
     this.sendAnswerButton.disabled = !this.canSend();
-  }
-
-  checkAnswer(cipherMessage, answer) {
-    return answer
-      .toUpperCase()
-      .split("")
-      .map((c, idx) => this.checkCharacter(cipherMessage[idx], c));
-  }
-
-  checkCharacter(cipherChar, answerChar) {
-    return cipherChar && answerChar && cipherChar === this.cipher(answerChar);
   }
 
   renderHTML() {
