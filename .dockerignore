@@ -1,0 +1,8 @@
+/dist
+/temp
+/node_modules
+/.git
+/.cache
+
+.gitignore
+wallaby.js
