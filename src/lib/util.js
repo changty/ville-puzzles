@@ -19,3 +19,15 @@ export function cipher(settings, message) {
     })
     .join("");
 }
+
+export function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.substr(1);
+}
+
+export function setVendorStyle(element, property, value) {
+  const prop = capitalize(property);
+  element.style["webkit" + prop] = value;
+  element.style["moz" + prop] = value;
+  element.style["ms" + prop] = value;
+  element.style["o" + prop] = value;
+}

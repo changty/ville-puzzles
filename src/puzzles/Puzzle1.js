@@ -1,4 +1,5 @@
 import { BasePuzzle } from "./BasePuzzle";
+import { setVendorStyle } from "../lib/util";
 
 import "./Puzzle1.css";
 
@@ -222,9 +223,8 @@ export class Puzzle1 extends BasePuzzle {
     const rotation = ringRotation * this.ringDegreePerChar;
 
     // Update rotation
-    document.querySelector(
-      "#puzzleRing #ringWrapper #characters"
-    ).style.transform = `rotateY(${-rotation}deg)`;
+    const el = document.querySelector("#puzzleRing #ringWrapper #characters");
+    setVendorStyle(el, "transform", `rotateY(${-rotation}deg)`);
 
     // Update selected class
     // Use setTimeout so the class is set somewhat in sync with the animation
@@ -324,22 +324,25 @@ export class Puzzle1 extends BasePuzzle {
   }
 
   renderCipherRing() {
-    const { selectedCharIdx } = this.state;
     const { characterSet } = this.setting;
+
+    const translateZ = "300";
 
     const charSet = this.renderElement(
       "ul",
       "characters",
-      characterSet
-        .split("")
-        .map(
-          (c, idx) =>
-            `<li class="characterSet char-${idx} ${
-              idx === selectedCharIdx ? "current-char" : ""
-            }" style="transform: rotateY(${idx *
-              this.ringDegreePerChar}deg) translateZ(300px)">${c}</li>`
-        )
-        .join(""),
+      characterSet.split("").map((c, idx) => {
+        const rotation = idx * this.ringDegreePerChar;
+        const li = document.createElement("li");
+        li.classList.add("characterSet");
+        setVendorStyle(
+          li,
+          "transform",
+          `rotateY(${rotation}deg) translateZ(${translateZ}px)`
+        );
+        li.innerHTML = c;
+        return li;
+      }),
       null
     );
 
