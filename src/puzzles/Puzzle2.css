@@ -11,8 +11,6 @@
   grid-auto-rows: 40px; 
 }
 
-#gridWrapper .col-1 {}
-
 .spot{
   position: relative;
   display: flex;

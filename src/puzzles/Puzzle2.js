@@ -168,12 +168,13 @@ class Spot {
   renderHTML({ onClick }) {
     const el = document.createElement("div");
     el.className = "spot";
-    el.classList.add("col-" + this.col);
-    el.classList.add("row-" + this.row);
+
     if (this.objectType) el.classList.add(objectTypes[this.objectType]);
     else el.classList.add("empty");
+
     el.style.gridColumn = this.col;
     el.style.gridRow = this.row;
+
     el.innerHTML = this.objectType ? objectTypes[this.objectType] : "&bull;";
 
     if (this.row === 1)
