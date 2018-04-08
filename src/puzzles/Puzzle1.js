@@ -110,15 +110,12 @@ export class Puzzle1 extends BasePuzzle {
   onSubmit() {
     if (!this.canSubmit()) return;
     const check = this.checkAnswer(this.cipherMessage, this.state.answer);
-    this.setState({ check, submitted: true }, () => {
-      this.updateAnswer();
-      this.updateButtons();
-    });
+    this.setState({ check, submitted: true });
   }
 
   onSendAnswer() {
     if (!this.canSend()) return;
-    this.sendAnswer(this.updateButtons.bind(this));
+    this.sendAnswer();
   }
 
   onErase() {
@@ -131,11 +128,7 @@ export class Puzzle1 extends BasePuzzle {
       currentCharIdx -= 1;
       answer = answer.slice(0, -1);
     }
-    this.setState({ answer, currentCharIdx }, () => {
-      this.updateQuestion();
-      this.updateAnswer();
-      this.updateButtons();
-    });
+    this.setState({ answer, currentCharIdx });
   }
 
   onPrevClick() {
@@ -149,7 +142,7 @@ export class Puzzle1 extends BasePuzzle {
       selectedCharIdx -= 1;
     }
 
-    this.setState({ selectedCharIdx }, this.updateRing.bind(this));
+    this.setState({ selectedCharIdx });
   }
 
   onNextClick() {
@@ -163,7 +156,7 @@ export class Puzzle1 extends BasePuzzle {
       selectedCharIdx += 1;
     }
 
-    this.setState({ selectedCharIdx }, this.updateRing.bind(this));
+    this.setState({ selectedCharIdx });
   }
 
   onSelectClick() {
@@ -176,11 +169,7 @@ export class Puzzle1 extends BasePuzzle {
       currentCharIdx += 1;
       answer += " ";
     }
-    this.setState({ answer, currentCharIdx }, () => {
-      this.updateQuestion();
-      this.updateAnswer();
-      this.updateButtons();
-    });
+    this.setState({ answer, currentCharIdx });
   }
 
   canSelect() {
@@ -204,6 +193,14 @@ export class Puzzle1 extends BasePuzzle {
 
   canSend() {
     return this.state.submitted && !this.state.answerSent;
+  }
+
+  updateView() {
+    super.updateView();
+    this.updateAnswer();
+    this.updateButtons();
+    this.updateQuestion();
+    this.updateRing();
   }
 
   updateRing() {

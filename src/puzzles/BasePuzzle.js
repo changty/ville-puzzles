@@ -70,5 +70,8 @@ export class BasePuzzle {
     const oldState = this.state;
     this.state = Object.assign({}, oldState, newState);
     if (typeof callback === "function") callback();
+    else this.updateView();
   }
+
+  updateView() {}
 }
