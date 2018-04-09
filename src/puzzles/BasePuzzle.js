@@ -34,7 +34,8 @@ export class BasePuzzle {
   onSubmit() {}
 
   sendAnswer(callback) {
-    window.alert(`Vastaus "${this.state.answer}" lähetetty!`);
+    const answer = JSON.stringify(this.state.answer);
+    window.alert(`Vastaus "${answer}" lähetetty!`);
     this.setState({ answerSent: true }, callback);
   }
 

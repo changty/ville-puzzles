@@ -75,6 +75,11 @@ export class Puzzle1 extends BasePuzzle {
     document.onkeydown = this.onKeyPress.bind(this);
   }
 
+  cleanUp() {
+    console.log("Clean up");
+    document.onkeydown = null;
+  }
+
   checkAnswer(cipherText, answer) {
     return answer
       .toUpperCase()

@@ -2,11 +2,34 @@ import { randomChoice } from "./lib/util";
 import { Puzzle2 } from "./puzzles";
 
 function init() {
-  const puzzleSetting = {
-    rows: 10,
-    cols: 10,
-    objects: [[1, 1, 301], [2, 5, 304], [3, 9, 302], [9, 6, 303]]
-  };
+  const possibleSettings = [
+    {
+      rows: 10,
+      cols: 10,
+      objects: [
+        [1, 1, "lake"],
+        [2, 5, "mushroom"],
+        [3, 9, "tree"],
+        [9, 6, "treestump"]
+      ],
+      input: "mouse", // ("mouse", "text")
+      examples: ["Järvi (1, 1)", "Sieni (2, 5)"]
+    },
+    {
+      rows: 10,
+      cols: 10,
+      objects: [
+        [4, 2, "lake"],
+        [3, 5, "mushroom"],
+        [2, 9, "tree"],
+        [9, 6, "treestump"]
+      ],
+      input: "text", // ("mouse", "text")
+      examples: ["Järvi (4, 2)", "Sieni (3, 5)"]
+    }
+  ];
+
+  const puzzleSetting = randomChoice(possibleSettings);
 
   const puzzleQuestions = [
     "Kirjoita tai klikkaa missä puunkanto sijaitsee.",

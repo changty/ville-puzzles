@@ -2,26 +2,15 @@ import { BasePuzzle } from "./BasePuzzle";
 
 import "./Puzzle2.css";
 
-const objectTypes = {
-  101: "riverTopBot",
-  102: "riverLeftRight",
-  103: "riverDiagTopBot",
-  104: "riverDiagBotTop",
-  205: "bridgeTopBot",
-  206: "bridgeLeftRight",
-  207: "bridgeDiagTopBot",
-  208: "bridgeDiagBotTop",
-  301: "lake",
-  302: "tree",
-  303: "treestump",
-  304: "mushroom"
-};
-
-function indexToRowCol(cols, idx) {
+function indexToRowCol(numOfCols, idx) {
   return {
-    col: Math.floor(idx % cols),
-    row: Math.floor(idx / cols)
+    col: Math.floor(idx % numOfCols),
+    row: Math.floor(idx / numOfCols)
   };
+}
+
+function rowColToIndex(numOfCols, row, col) {
+  return row * numOfCols + col;
 }
 
 const defaultOptions = {
@@ -40,25 +29,32 @@ export class Puzzle2 extends BasePuzzle {
 
     this.setting = setting;
 
+    this.state = {
+      answer: { row: null, col: null }
+    };
+
     this.indexToRowCol = indexToRowCol.bind(null, setting.cols);
+    this.rowColToIndex = rowColToIndex.bind(null, setting.cols);
+
     this.onSpotClick = this.onSpotClick.bind(this);
     this.onAnswerChange = this.onAnswerChange.bind(this);
 
     this.html.description = this.options["str-description"];
     this.html.question = this.options["str-question"];
 
+    // Init an array with empty Spot in each element
     this.grid = Array(this.setting.rows * this.setting.cols)
       .fill(null) // Fill with nulls so we can use map()
       .map((_, idx) => {
         const rowCol = this.indexToRowCol(idx);
-        return new Spot(
-          rowCol.row,
-          rowCol.col,
-          this.setting.objects.find(
-            o => o[0] === rowCol.row + 1 && o[1] === rowCol.col + 1
-          )
-        );
+        return new Spot(rowCol.row, rowCol.col);
       });
+
+    // Replace Spot objectType with received parameters
+    this.setting.objects.forEach(s => {
+      const idx = this.rowColToIndex(s[0], s[1]);
+      this.grid[idx].objectType = s[2];
+    });
 
     this.setup();
   }
@@ -68,18 +64,23 @@ export class Puzzle2 extends BasePuzzle {
     this.sendAnswer();
   }
 
-  onSpotClick(e, spot) {
-    this.onAnswerChange(null, `rivi: ${spot.row}, sarake: ${spot.col}`);
+  onSpotClick(event, spot) {
+    const { row, col } = spot;
+    this.onAnswerChange(null, { row, col });
   }
 
-  onAnswerChange(e, newAnswer) {
+  onAnswerChange(event, newAnswer) {
     if (!this.canEditAnswer()) return;
-    this.setState({ answer: e ? e.target.value : newAnswer || "" });
+    const { answer } = this.state;
+    if (event && ["row", "col"].indexOf(event.target.name) > -1) {
+      answer[event.target.name] = event.target.value;
+    }
+    this.setState({ answer: event ? answer : newAnswer });
   }
 
   canSend() {
     const { answer, answerSent } = this.state;
-    return !answerSent && answer.length > 0;
+    return !answerSent && answer.row !== null && answer.col !== null;
   }
 
   canEditAnswer() {
@@ -99,8 +100,15 @@ export class Puzzle2 extends BasePuzzle {
   }
 
   updateAnswer() {
-    this.textArea.value = this.state.answer;
-    this.textArea.disabled = !this.canEditAnswer();
+    const { answer } = this.state;
+
+    this.rowInput.value = answer.row;
+    this.rowInput.disabled =
+      !this.canEditAnswer() || this.setting.input === "mouse";
+
+    this.colInput.value = answer.col;
+    this.colInput.disabled =
+      !this.canEditAnswer() || this.setting.input === "mouse";
   }
 
   renderHTML() {
@@ -139,16 +147,34 @@ export class Puzzle2 extends BasePuzzle {
   }
 
   renderInputForm() {
-    const textArea = document.createElement("textarea");
-    textArea.onchange = this.onAnswerChange;
-    textArea.onkeyup = this.onAnswerChange;
-    this.textArea = textArea;
-    return this.renderElement("form", "inputForm", [textArea], null);
+    this.rowInput = document.createElement("input");
+    this.colInput = document.createElement("input");
+
+    [this.rowInput, this.colInput].forEach(i => {
+      i.type = "number";
+      i.step = 1;
+      i.min = 1;
+      i.disabled = this.setting.input === "mouse";
+      i.onchange = this.onAnswerChange;
+      i.onkeyup = this.onAnswerChange;
+    });
+
+    this.rowInput.max = this.setting.rows;
+    this.rowInput.name = "row";
+    this.colInput.max = this.setting.cols;
+    this.colInput.name = "col";
+
+    return this.renderElement(
+      "form",
+      "inputForm",
+      [this.rowInput, this.colInput],
+      null
+    );
   }
 }
 
 class Spot {
-  constructor(row_0, col_0, objectType) {
+  constructor(row_0, col_0, objectType = null) {
     /**
      * @param {number} row_0 - 0-indexed row
      * @param {number} col_0 - 0-indexed col
@@ -160,22 +186,20 @@ class Spot {
     this.row_0 = row_0;
     this.row = row_0 + 1; // Human readable coordinate in 1-indexed system
 
-    this.objectType = Array.isArray(objectType)
-      ? objectType[2]
-      : typeof objectType === "number" ? objectType : null;
+    this.objectType = objectType;
   }
 
   renderHTML({ onClick }) {
     const el = document.createElement("div");
     el.className = "spot";
 
-    if (this.objectType) el.classList.add(objectTypes[this.objectType]);
+    if (this.objectType) el.classList.add(this.objectType);
     else el.classList.add("empty");
 
     el.style.gridColumn = this.col;
     el.style.gridRow = this.row;
 
-    el.innerHTML = this.objectType ? objectTypes[this.objectType] : "&bull;";
+    el.innerHTML = this.objectType || "&bull;";
 
     if (this.row === 1)
       el.appendChild(this.renderIndexingNumber("col", this.col));
@@ -196,8 +220,6 @@ class Spot {
   }
 
   toString() {
-    return `${this.objectType ? objectTypes[this.objectType] : null} (${
-      this.row
-    }, ${this.col})`;
+    return `${this.objectType || null} (${this.row}, ${this.col})`;
   }
 }
