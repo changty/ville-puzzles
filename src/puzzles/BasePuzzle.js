@@ -35,7 +35,7 @@ export class BasePuzzle {
 
   sendAnswer(callback) {
     const answer = JSON.stringify(this.state.answer);
-    window.alert(`Vastaus "${answer}" lähetetty!`);
+    window.alert(`Vastaus ${answer} lähetetty!`);
     this.setState({ answerSent: true }, callback);
   }
 
@@ -48,7 +48,8 @@ export class BasePuzzle {
   renderElement(type, id, inner, parent = this.parentEl) {
     const newEl = document.createElement(type);
     newEl.id = id;
-    if (inner && inner.innerHTML) {
+
+    if (inner && inner instanceof HTMLElement) {
       newEl.appendChild(inner);
     } else if (inner instanceof Array) {
       inner.map(e => {
@@ -57,6 +58,7 @@ export class BasePuzzle {
     } else {
       newEl.innerHTML = inner || "";
     }
+
     if (parent) {
       const oldEl = document.querySelector(`#${id}`);
       if (oldEl) parent.removeChild(oldEl);

@@ -76,7 +76,6 @@ export class Puzzle1 extends BasePuzzle {
   }
 
   cleanUp() {
-    console.log("Clean up");
     document.onkeydown = null;
   }
 
