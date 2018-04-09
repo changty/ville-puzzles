@@ -326,7 +326,7 @@ export class Puzzle1 extends BasePuzzle {
   renderCipherRing() {
     const { characterSet } = this.setting;
 
-    const translateZ = "300";
+    const radius = 300;
 
     const charSet = this.renderElement(
       "ul",
@@ -338,7 +338,7 @@ export class Puzzle1 extends BasePuzzle {
         setVendorStyle(
           li,
           "transform",
-          `rotateY(${rotation}deg) translateZ(${translateZ}px)`
+          `rotateY(${rotation}deg) translateZ(${radius}px)`
         );
         li.innerHTML = c;
         return li;
