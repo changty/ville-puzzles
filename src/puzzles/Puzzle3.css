@@ -8,17 +8,49 @@
 #background #background-image {
   max-width: 100%;
   max-height: 100%;
-  pointer-events: none;
-  user-select: none; 
 }
 
-#background .background-slot {
+#background .slot {
   position: absolute;
   border: 4px solid rgba(0, 255, 0, 0.7);
   border-radius: 50%;
   cursor: pointer;
 }
 
-#background .background-slot:hover {
-  border-width: 6px;
+#background .slot:hover {
+  border-color: rgb(0, 144, 0);
+}
+
+#draggables-container {
+  position: fixed;
+  top: 120px;
+  left: 20px;
+  padding: 10px;
+  border: 1px dashed gray;
+  width: 122px;
+  min-height: 62px;
+}
+
+.draggable {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100px;
+  height: 40px;
+  border: 1px solid rgb(185, 185, 185);
+  background-color: white;
+  zoom: 100%;
+}
+
+.draggable:hover {
+  border: 1px solid gray
+}
+
+.draggable.small {
+  zoom: 50%;
+}
+
+.draggable.hide {
+  visibility: hidden;
 }
