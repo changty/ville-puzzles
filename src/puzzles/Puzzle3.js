@@ -1,5 +1,4 @@
 import { BasePuzzle } from "./BasePuzzle";
-import { setVendorStyle } from "../lib/util";
 
 import "./Puzzle3.css";
 
@@ -139,6 +138,7 @@ export class Puzzle3 extends BasePuzzle {
   renderDraggables() {
     return this.draggables.map(d => d.render());
   }
+
   // renderBackground() {
   //   const { background } = this.setting;
   //   let el;
@@ -164,6 +164,8 @@ class Slot {
     this.size = size;
     this.position = position;
 
+    this.draggable = null;
+
     this.el = document.createElement("div");
     this.el.className = "slot";
     this.el.style.width = this.size + "px";
@@ -171,19 +173,8 @@ class Slot {
 
     this.el.ondragover = this.onDragover.bind(this);
     this.el.ondrop = this.onDrop.bind(this);
-  }
-
-  onDragover(event) {
-    event.preventDefault();
-  }
-
-  onDrop(event) {
-    event.preventDefault();
-    if (this.draggable) return;
-    const data = event.dataTransfer.getData("text");
-    const el = document.getElementById(data);
-    el.Draggable.setSlot(this);
-    this.el.appendChild(el);
+    this.el.ondragenter = this.onDragEnter.bind(this);
+    this.el.ondragleave = this.onDragLeave.bind(this);
   }
 
   setDraggable(newDraggable) {
@@ -200,12 +191,33 @@ class Slot {
     this.setPosition(ratios);
     return this.el;
   }
+
+  onDragover(event) {
+    event.preventDefault();
+  }
+
+  onDrop(event) {
+    event.preventDefault();
+    this.el.classList.remove("drag-hover");
+    if (this.draggable) return; // Already occupied
+    const data = event.dataTransfer.getData("text");
+    const el = document.getElementById(data);
+    el.Draggable.setSlot(this);
+    this.el.appendChild(el);
+  }
+
+  onDragEnter() {
+    this.el.classList.add("drag-hover");
+  }
+
+  onDragLeave() {
+    this.el.classList.remove("drag-hover");
+  }
 }
 
 class Draggable {
   constructor(title, idx) {
     this.title = title;
-    this.size = 200;
 
     this.slot = null;
 
@@ -226,11 +238,21 @@ class Draggable {
     this.el.Draggable = this;
   }
 
-  onMouseEnter(event) {
+  setSlot(newSlot) {
+    if (this.slot) this.slot.setDraggable(null);
+    if (newSlot) newSlot.setDraggable(this);
+    this.slot = newSlot;
+  }
+
+  render() {
+    return this.el;
+  }
+
+  onMouseEnter() {
     this.el.classList.remove("small");
   }
 
-  onMouseLeave(event) {
+  onMouseLeave() {
     if (this.slot) this.el.classList.add("small");
   }
 
@@ -246,22 +268,12 @@ class Draggable {
     }, 1);
   }
 
-  onDragEnd(event) {
+  onDragEnd() {
     this.el.classList.remove("dragging");
 
     setTimeout(() => {
       // Needs to be in a timeout, read above in onDragStart()
       this.el.classList.remove("hide");
     }, 1);
-  }
-
-  setSlot(newSlot) {
-    if (this.slot) this.slot.setDraggable(null);
-    if (newSlot) newSlot.setDraggable(this);
-    this.slot = newSlot;
-  }
-
-  render() {
-    return this.el;
   }
 }

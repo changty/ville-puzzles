@@ -17,7 +17,8 @@
   cursor: pointer;
 }
 
-#background .slot:hover {
+#background .slot:hover,
+#background .slot.drag-hover {
   border-color: rgb(0, 144, 0);
 }
 
