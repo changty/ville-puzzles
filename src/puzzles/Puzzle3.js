@@ -19,9 +19,22 @@ export class Puzzle3 extends BasePuzzle {
     this.state.submitted = false;
 
     this.slots = this.setting.slots.map(s => new Slot(20, s));
-    this.draggables = ["Drag me 1", "Drag me 2", "Drag me 3"].map(
-      (title, idx) => new Draggable(title, idx)
-    );
+
+    const draggables = [
+      { type: "image/png", content: "https://picsum.photos/200/100/?random" },
+      { type: "image/png", content: "https://picsum.photos/200/200/?random" },
+      { type: "image/png", content: "https://picsum.photos/100/100/?random" },
+      {
+        type: "video/youtube",
+        content: "https://www.youtube.com/embed/tgbNymZ7vqY"
+      },
+      { type: "text/plain", content: "Drag me 1" },
+      { type: "text/plain", content: "Drag me 2" },
+      { type: "text/plain", content: "Drag me 3" }
+      // <embed width="420" height="315" src="https://www.youtube.com/embed/tgbNymZ7vqY">
+    ];
+
+    this.draggables = draggables.map((o, i) => new Draggable(o, i));
 
     // this.html.description = this.options["str-description"];
     // this.html.question = this.options["str-question"];
@@ -96,8 +109,10 @@ export class Puzzle3 extends BasePuzzle {
     draggabblesContainer.ondragover = event => event.preventDefault();
     draggabblesContainer.ondrop = event => {
       event.preventDefault();
-      const data = event.dataTransfer.getData("text");
-      const el = document.getElementById(data);
+      const id = event.dataTransfer.getData("dragged-id");
+      if (!id) return;
+      const el = document.getElementById(id);
+      if (!el.Draggable) return;
       el.Draggable.setSlot(null);
       draggabblesContainer.appendChild(el);
     };
@@ -138,25 +153,6 @@ export class Puzzle3 extends BasePuzzle {
   renderDraggables() {
     return this.draggables.map(d => d.render());
   }
-
-  // renderBackground() {
-  //   const { background } = this.setting;
-  //   let el;
-  //   let tempEl;
-  //   switch (background.mime.split("/")[0]) {
-  //     case "image":
-  //       tempEl = document.createElement("img");
-  //       tempEl.src = background.url;
-  //       tempEl.className = "background-image";
-  //       console.log(tempEl.width);
-  //       console.log(tempEl.height);
-  //       el = tempEl;
-  //       break;
-  //     default:
-  //       return null;
-  //   }
-  //   return el;
-  // }
 }
 
 class Slot {
@@ -200,8 +196,10 @@ class Slot {
     event.preventDefault();
     this.el.classList.remove("drag-hover");
     if (this.draggable) return; // Already occupied
-    const data = event.dataTransfer.getData("text");
-    const el = document.getElementById(data);
+    const id = event.dataTransfer.getData("dragged-id");
+    if (!id) return;
+    const el = document.getElementById(id);
+    if (!el.Draggable) return;
     el.Draggable.setSlot(this);
     this.el.appendChild(el);
   }
@@ -216,9 +214,7 @@ class Slot {
 }
 
 class Draggable {
-  constructor(title, idx) {
-    this.title = title;
-
+  constructor(options, idx) {
     this.slot = null;
 
     this.el = document.createElement("div");
@@ -226,40 +222,70 @@ class Draggable {
     this.el.id = `draggable-${idx}`;
     this.el.className = "draggable";
 
-    this.el.innerHTML = this.title;
+    this.el.appendChild(this.renderContent(options));
 
     this.el.draggable = true;
     this.el.ondragstart = this.onDragStart.bind(this);
     this.el.ondragend = this.onDragEnd.bind(this);
 
-    this.el.onmouseenter = this.onMouseEnter.bind(this);
-    this.el.onmouseleave = this.onMouseLeave.bind(this);
-
     this.el.Draggable = this;
   }
 
-  setSlot(newSlot) {
-    if (this.slot) this.slot.setDraggable(null);
-    if (newSlot) newSlot.setDraggable(this);
-    this.slot = newSlot;
+  renderContent(options) {
+    const { type, content } = options;
+    let el;
+    switch (type.split("/")[0]) {
+      case "image":
+        this.el.classList.add("loading");
+        el = document.createElement("img");
+        el.src = content;
+        el.onload = () => {
+          this.el.classList.remove("loading");
+        };
+        break;
+      case "video":
+        this.el.classList.add("loading");
+        el = document.createElement("embed");
+        el.src = content;
+        el.width = 200 + "px";
+        el.height = 100 + "px";
+        el.onload = () => {
+          this.el.classList.remove("loading");
+        };
+        this.el.classList.add("extra-space");
+        break;
+      case "text":
+        el = document.createElement("p");
+        el.innerHTML = content;
+        break;
+      default:
+        el = document.createElement("p");
+        el.innerHTML = "N/A";
+    }
+    return el;
   }
 
   render() {
     return this.el;
   }
 
-  onMouseEnter() {
-    this.el.classList.remove("small");
-  }
-
-  onMouseLeave() {
-    if (this.slot) this.el.classList.add("small");
+  setSlot(newSlot) {
+    if (this.slot) {
+      // Moving out of this.slot
+      this.slot.setDraggable(null);
+    }
+    if (newSlot) {
+      // Moving into newSlot
+      newSlot.setDraggable(this);
+    }
+    this.slot = newSlot;
   }
 
   onDragStart(event) {
-    event.dataTransfer.setData("text", this.el.id);
+    event.dataTransfer.setData("dragged-id", this.el.id);
 
     this.el.classList.add("dragging");
+    this.el.classList.remove("in-slot");
 
     setTimeout(() => {
       // Needs to be in a timeout because otherwise element we are dragging
@@ -270,10 +296,9 @@ class Draggable {
 
   onDragEnd() {
     this.el.classList.remove("dragging");
-
-    setTimeout(() => {
-      // Needs to be in a timeout, read above in onDragStart()
-      this.el.classList.remove("hide");
-    }, 1);
+    if (this.slot) {
+      this.el.classList.add("in-slot");
+    }
+    this.el.classList.remove("hide");
   }
 }
