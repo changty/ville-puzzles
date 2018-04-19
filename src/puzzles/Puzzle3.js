@@ -30,7 +30,7 @@ export class Puzzle3 extends BasePuzzle {
       },
       { type: "text/plain", content: "Drag me 1" },
       { type: "text/plain", content: "Drag me 2" },
-      { type: "text/plain", content: "Drag me 3" }
+      { type: "text/plain", content: "Drag me 3 very long text" }
       // <embed width="420" height="315" src="https://www.youtube.com/embed/tgbNymZ7vqY">
     ];
 
@@ -256,6 +256,8 @@ class Draggable {
         break;
       case "text":
         el = document.createElement("p");
+        this.el.style.minWidth = 100 + "px";
+        this.el.style.padding = 4 + "px";
         el.innerHTML = content;
         break;
       default:
