@@ -7,23 +7,19 @@ function init() {
   const possibleSettings = [
     {
       key: "+1",
-      keyDesc: "yksi askel eteenpäin",
-      keyExample: "A &#8594; B, B &#8594; C..., Ä &#8594; Ö, Ö &#8594; A"
+      keyExample: "A → B, B → C..., Ä → Ö, Ö → A"
     },
     {
       key: "+2",
-      keyDesc: "kaksi askelta eteenpäin",
-      keyExample: "A &#8594; C, B &#8594; D..., Ä &#8594; A, Ö &#8594; B"
+      keyExample: "A → C, B → D..., Ä → A, Ö → B"
     },
     {
       key: "-1",
-      keyDesc: "yksi askel taaksepäin",
-      keyExample: "A &#8594; Ö, B &#8594; A..., Ä &#8594; Å, Ö &#8594; Ä"
+      keyExample: "A → Ö, B → A..., Ä → Å, Ö → Ä"
     },
     {
       key: "-2",
-      keyDesc: "kaksi askelta taaksepäin",
-      keyExample: "A &#8594; Ä, B &#8594; Ö..., Ä &#8594; Z, Ö &#8594; Å"
+      keyExample: "A → Ä, B → Ö..., Ä → Z, Ö → Å"
     }
   ];
 

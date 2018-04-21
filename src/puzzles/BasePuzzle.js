@@ -19,10 +19,6 @@ export class BasePuzzle {
       answerSent: false
     };
 
-    this.html = {
-      name: options["str-name"]
-    };
-
     this.elementSelectors = Object.assign(
       {
         parent: "#puzzle"
@@ -45,31 +41,37 @@ export class BasePuzzle {
     this.renderHTML();
   }
 
+  renderInner(el, inner) {
+    if (inner instanceof HTMLElement || inner instanceof Text) {
+      el.appendChild(inner);
+    } else if (inner instanceof Array) {
+      inner.forEach(i => {
+        this.renderInner(el, i);
+      });
+    } else {
+      el.innerText = inner || "";
+    }
+  }
+
   renderElement(type, id, inner, parent = this.parentEl) {
     const newEl = document.createElement(type);
     newEl.id = id;
 
-    if (inner && inner instanceof HTMLElement) {
-      newEl.appendChild(inner);
-    } else if (inner instanceof Array) {
-      inner.map(e => {
-        newEl.appendChild(e);
-      });
-    } else {
-      newEl.innerHTML = inner || "";
-    }
+    this.renderInner(newEl, inner);
+
+    const oldEl = document.querySelector(`#${id}`);
+    if (oldEl) oldEl.parentNode.removeChild(oldEl);
 
     if (parent) {
-      const oldEl = document.querySelector(`#${id}`);
-      if (oldEl) parent.removeChild(oldEl);
       parent.appendChild(newEl);
     }
+
     return newEl;
   }
 
   renderHTML() {
     this.parentEl.innerHTML = "";
-    this.renderElement("h1", "puzzleName", this.html.name);
+    this.renderElement("h1", "puzzleName", this.options["str-name"]);
   }
 
   setState(newState, callback) {

@@ -3,41 +3,24 @@ import { setVendorStyle } from "../lib/util";
 
 import "./Puzzle1.css";
 
-export function makeCipherer({ characterSet, key }) {
-  const keys = /([+-])(\d+)/g.exec(key);
-  const factor = keys[1] === "-" ? -parseInt(keys[2]) : parseInt(keys[2]);
-
-  function cipherChar(c) {
-    if (characterSet.indexOf(c) === -1) return c;
-    let idx = characterSet.indexOf(c) + factor;
-    if (idx < 0) idx += characterSet.length;
-    else if (idx > characterSet.length - 1) idx -= characterSet.length;
-    return characterSet[idx];
-  }
-
-  return function cipherer(message) {
-    if (typeof message === "string") {
-      if (message.length === 1) {
-        return cipherChar(message.toUpperCase());
-      } else {
-        return message
-          .toUpperCase()
-          .split("")
-          .map(cipherChar)
-          .join("");
-      }
-    }
-  };
-}
-
 const defaultOptions = {
   "str-name": "Salakirjoitus",
-  "str-description": `
-    Majavat lähettävät tietoa erityistä salakirjoitusavainta käyttäen. 
-    Jokainen kirjain vaihdetaan aakkosissa {{keyDesc}} olevaan kirjaimeen. <br> 
-    Siis esim.. {{keyExample}}.`,
-  "str-question": `Vastaanotettu viesti: {{cipherText}} <br> 
-    <strong>Mikä oli viesti?</strong>`
+  "str-description":
+    "Majavat lähettävät tietoa erityistä salakirjoitusavainta käyttäen.",
+  "str-key-descriptions": {
+    "+1":
+      "Jokainen kirjain vaihdetaan aakkosissa yksi askel eteenpäin olevaan kirjaimeen.",
+    "+2":
+      "Jokainen kirjain vaihdetaan aakkosissa kaksi askelta eteenpäin olevaan kirjaimeen.",
+    "-1":
+      "Jokainen kirjain vaihdetaan aakkosissa yksi askel taaksepäin olevaan kirjaimeen.",
+    "-2":
+      "Jokainen kirjain vaihdetaan aakkosissa kaksi askelta taaksepäin olevaan kirjaimeen."
+  },
+  "str-example-label": "Siis esim..",
+  "str-ciphertext-label": "Vastaanotettu viesti:",
+  "str-question": "Mikä oli viesti?",
+  "str-answer-label": "Vastauksesi:"
 };
 
 export class Puzzle1 extends BasePuzzle {
@@ -62,10 +45,6 @@ export class Puzzle1 extends BasePuzzle {
       selectedCharIdx: 0,
       submitted: false
     };
-
-    this.html.description = this.options["str-description"]
-      .replace("{{keyDesc}}", setting.keyDesc)
-      .replace("{{keyExample}}", setting.keyExample);
 
     this.setup();
   }
@@ -246,11 +225,15 @@ export class Puzzle1 extends BasePuzzle {
   }
 
   updateQuestion() {
-    document.querySelector("#puzzleQuestion").innerHTML = this.renderQuestion();
+    const el = document.querySelector("#puzzleQuestion");
+    el.innerHTML = ""; // Clear old content
+    this.renderInner(el, this.renderQuestion());
   }
 
   updateAnswer() {
-    document.querySelector("#puzzleAnswer").innerHTML = this.renderAnswer();
+    const el = document.querySelector("#puzzleAnswer");
+    el.innerHTML = ""; // Clear old content
+    this.renderInner(el, this.renderAnswer());
   }
 
   updateButtons() {
@@ -263,16 +246,24 @@ export class Puzzle1 extends BasePuzzle {
   renderHTML() {
     super.renderHTML();
 
-    this.renderElement("p", "puzzleDescription", this.html.description);
+    this.renderElement("p", "puzzleDescription", [
+      document.createTextNode(this.options["str-description"]),
+      document.createElement("br"),
+      document.createTextNode(
+        this.options["str-key-descriptions"][this.setting.key]
+      ),
+      document.createElement("br"),
+      document.createTextNode(this.options["str-example-label"]),
+      document.createTextNode(" "),
+      document.createTextNode(this.setting.keyExample)
+    ]);
 
     this.renderElement("p", "puzzleQuestion", this.renderQuestion());
 
     this.renderElement("div", "puzzleRing", this.renderCipherRing());
 
-    this.renderElement("p", "puzzleAnswerLabel", "Vastauksesi:");
-
     // Render answer
-    this.renderElement("p", "puzzleAnswer");
+    this.renderElement("p", "puzzleAnswer", this.renderAnswer());
 
     // Render "Tarkista"-button
     this.submitButton = this.renderElement(
@@ -298,33 +289,44 @@ export class Puzzle1 extends BasePuzzle {
   renderQuestion() {
     const { currentCharIdx } = this.state;
     const { cipherText } = this.setting;
-    return this.options["str-question"].replace(
-      "{{cipherText}}",
-      cipherText
-        .split("")
-        .map(
-          (c, idx) =>
-            `<span class="characterSet ${
-              idx === currentCharIdx ? "current-char" : ""
-            }">${c}</span>`
-        )
-        .join("")
+
+    const labelText = document.createTextNode(
+      this.options["str-ciphertext-label"]
     );
+
+    const label = [labelText, document.createTextNode(" ")];
+
+    const chars = cipherText.split("").map((c, idx) => {
+      const el = document.createElement("span");
+      el.classList.add("cipher-char");
+      if (idx === currentCharIdx) el.classList.add("current-char");
+      el.innerText = c;
+      return el;
+    });
+
+    const questionEl = document.createElement("strong");
+    questionEl.innerText = this.options["str-question"];
+
+    return [label, chars, document.createElement("br"), questionEl];
   }
 
   renderAnswer() {
     const { answer, check, submitted } = this.state;
-    return submitted
-      ? answer
-          .split("")
-          .map(
-            (c, idx) =>
-              `<span class="${
-                check[idx] ? "correct" : "incorrect"
-              }">${c}</span>`
-          )
-          .join("")
-      : answer;
+
+    const labelText = document.createTextNode(this.options["str-answer-label"]);
+
+    const label = [labelText, document.createTextNode(" ")];
+
+    const chars = answer.split("").map((c, idx) => {
+      const el = document.createElement("span");
+      el.classList.add(check[idx] ? "correct" : "incorrect");
+      el.innerText = c;
+      return el;
+    });
+
+    const answerText = document.createTextNode(answer);
+
+    return submitted ? [label, chars] : [label, answerText];
   }
 
   renderCipherRing() {
@@ -332,25 +334,22 @@ export class Puzzle1 extends BasePuzzle {
 
     const radius = 300;
 
-    const charSet = this.renderElement(
-      "ul",
-      "characters",
-      characterSet.split("").map((c, idx) => {
-        const rotation = idx * this.ringDegreePerChar;
-        const li = document.createElement("li");
-        li.classList.add("characterSet");
-        setVendorStyle(
-          li,
-          "transform",
-          `rotateY(${rotation}deg) translateZ(${radius}px)`
-        );
-        li.innerHTML = c;
-        return li;
-      }),
-      null
-    );
+    const chars = characterSet.split("").map((c, idx) => {
+      const rotation = idx * this.ringDegreePerChar;
+      const el = document.createElement("li");
+      el.classList.add("characterSet");
+      el.innerText = c;
+      setVendorStyle(
+        el,
+        "transform",
+        `rotateY(${rotation}deg) translateZ(${radius}px)`
+      );
+      return el;
+    });
 
-    const ringWrapper = this.renderElement("div", "ringWrapper", charSet, null);
+    const ring = this.renderElement("ul", "characters", chars, null);
+
+    const ringWrapper = this.renderElement("div", "ringWrapper", ring, null);
 
     const eraseButton = this.renderElement(
       "button",
@@ -386,4 +385,31 @@ export class Puzzle1 extends BasePuzzle {
 
     return [ringWrapper, controls];
   }
+}
+
+export function makeCipherer({ characterSet, key }) {
+  const keys = /([+-])(\d+)/g.exec(key);
+  const factor = keys[1] === "-" ? -parseInt(keys[2]) : parseInt(keys[2]);
+
+  function cipherChar(c) {
+    if (characterSet.indexOf(c) === -1) return c;
+    let idx = characterSet.indexOf(c) + factor;
+    if (idx < 0) idx += characterSet.length;
+    else if (idx > characterSet.length - 1) idx -= characterSet.length;
+    return characterSet[idx];
+  }
+
+  return function cipherer(message) {
+    if (typeof message === "string") {
+      if (message.length === 1) {
+        return cipherChar(message.toUpperCase());
+      } else {
+        return message
+          .toUpperCase()
+          .split("")
+          .map(cipherChar)
+          .join("");
+      }
+    }
+  };
 }

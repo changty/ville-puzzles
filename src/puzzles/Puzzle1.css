@@ -1,29 +1,31 @@
-span.correct {
+#puzzleQuestion .current-char {
+  font-weight: bold;
+  position: relative;
+}
+
+#puzzleQuestion .cipher-char {
+  padding: 0 .12em 0 .12em;
+}
+
+#puzzleQuestion .current-char::after {
+  content: "⬆";
+  position: absolute;
+  top: 0.75em;
+  left: 0;
+  width: 100%;
+  text-align: center;
+}
+
+#puzzleAnswer .correct {
   color: green;
 }
 
-span.incorrect {
+#puzzleAnswer .incorrect {
   color: red
-}
-
-span.current-char {
-  font-weight: bold
-}
-
-.characterSet {
-  padding: 0 .12em 0 .12em;
 }
 
 .current-char {
   text-decoration: underline;
-  position: relative;
-}
-
-#puzzleQuestion .current-char::after {
-  content: "^";
-  position: absolute;
-  top: 1em;
-  left: 0;
 }
 
 #puzzleRing {
