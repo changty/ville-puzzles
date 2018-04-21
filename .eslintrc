@@ -5,8 +5,8 @@
     "mocha": true,
     "node": true
   },
-  "plugins": ["compat"],
-  "extends": ["eslint:recommended"],
+  "plugins": ["compat", "no-unsanitized"],
+  "extends": ["eslint:recommended", "plugin:no-unsanitized/DOM"],
   "rules": {
     "compat/compat": "error"
   },

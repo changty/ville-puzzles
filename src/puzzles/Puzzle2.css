@@ -11,6 +11,12 @@
   grid-auto-rows: 40px; 
 }
 
+#puzzleInput textarea {
+  width: 100%;
+  max-width: 500px;
+  min-height: 50px;
+}
+
 .spot{
   position: relative;
   display: flex;
@@ -58,9 +64,30 @@
   top: -21px;
 }
 
-#puzzleInput textarea {
+.spot.lake:after {
+  /* Placeholder */
+  content: "lake";
   width: 100%;
-  max-width: 500px;
-  min-height: 50px;
+  word-wrap: break-word;
 }
 
+.spot.mushroom:after {
+  /* Placeholder */
+  content: "mushroom";
+  width: 100%;
+  word-wrap: break-word;
+}
+
+.spot.tree:after {
+  /* Placeholder */
+  content: "tree";
+  width: 100%;
+  word-wrap: break-word;
+}
+
+.spot.treestump:after {
+  /* Placeholder */
+  content: "treestump";
+  width: 100%;
+  word-wrap: break-word;
+}

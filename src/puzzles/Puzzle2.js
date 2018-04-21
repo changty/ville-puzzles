@@ -1,17 +1,7 @@
 import { BasePuzzle } from "./BasePuzzle";
+import { rowColToIndex, indexToRowCol } from "../lib/util";
 
 import "./Puzzle2.css";
-
-function indexToRowCol(numOfCols, idx) {
-  return {
-    col: Math.floor(idx % numOfCols),
-    row: Math.floor(idx / numOfCols)
-  };
-}
-
-function rowColToIndex(numOfCols, row, col) {
-  return row * numOfCols + col;
-}
 
 const defaultOptions = {
   "str-name": "Majavakartta",
@@ -29,18 +19,15 @@ export class Puzzle2 extends BasePuzzle {
 
     this.setting = setting;
 
-    this.state = {
+    this.state = Object.assign(this.state, {
       answer: { row: null, col: null }
-    };
+    });
 
     this.indexToRowCol = indexToRowCol.bind(null, setting.cols);
     this.rowColToIndex = rowColToIndex.bind(null, setting.cols);
 
     this.onSpotClick = this.onSpotClick.bind(this);
     this.onAnswerChange = this.onAnswerChange.bind(this);
-
-    this.html.description = this.options["str-description"];
-    this.html.question = this.options["str-question"];
 
     // Init an array with empty Spot in each element
     this.grid = Array(this.setting.rows * this.setting.cols)
@@ -52,7 +39,8 @@ export class Puzzle2 extends BasePuzzle {
 
     // Replace Spot objectType with received parameters
     this.setting.objects.forEach(s => {
-      const idx = this.rowColToIndex(s[0], s[1]);
+      // setting indexes are 1-indexed so we need to substract 1
+      const idx = this.rowColToIndex(s[0] - 1, s[1] - 1);
       this.grid[idx].objectType = s[2];
     });
 
@@ -114,14 +102,19 @@ export class Puzzle2 extends BasePuzzle {
   renderHTML() {
     super.renderHTML();
 
-    this.renderElement("p", "puzzleDescription", this.html.description);
-
+    this.renderElement(
+      "p",
+      "puzzleDescription",
+      this.options["str-description"]
+    );
+    this.renderElement("div", "puzzleExample", this.renderExamples());
     this.renderElement("div", "puzzleGrid", this.renderGrid());
-
-    this.renderElement("p", "puzzleQuestion", this.html.question);
-
-    this.renderElement("p", "puzzleAnswerLabel", "Vastauksesi: ");
-
+    this.renderElement("p", "puzzleQuestion", this.setting.question);
+    this.renderElement(
+      "p",
+      "puzzleAnswerLabel",
+      this.options["str-answer-label"]
+    );
     this.renderElement("div", "puzzleInput", this.renderInputForm());
 
     // Render "Lähetä"-button
@@ -134,6 +127,16 @@ export class Puzzle2 extends BasePuzzle {
     this.sendAnswerButton.disabled = true;
 
     this.updateView();
+  }
+
+  renderExamples() {
+    const ul = document.createElement("ul");
+    this.setting.examples.forEach(text => {
+      const el = document.createElement("li");
+      el.innerText = text;
+      ul.appendChild(el);
+    });
+    return ul;
   }
 
   renderGrid() {
@@ -180,12 +183,8 @@ class Spot {
      * @param {number} col_0 - 0-indexed col
      * @param {number} objectType
      */
-    this.col_0 = col_0;
-    this.col = col_0 + 1; // Human readable coordinate in 1-indexed system
-
-    this.row_0 = row_0;
-    this.row = row_0 + 1; // Human readable coordinate in 1-indexed system
-
+    this.col = col_0 + 1; // Coordinate in 1-indexed system
+    this.row = row_0 + 1; // Coordinate in 1-indexed system
     this.objectType = objectType;
   }
 
@@ -194,12 +193,13 @@ class Spot {
     el.className = "spot";
 
     if (this.objectType) el.classList.add(this.objectType);
-    else el.classList.add("empty");
+    else {
+      el.classList.add("empty");
+      el.innerText = "•";
+    }
 
     el.style.gridColumn = this.col;
     el.style.gridRow = this.row;
-
-    el.innerHTML = this.objectType || "&bull;";
 
     if (this.row === 1)
       el.appendChild(this.renderIndexingNumber("col", this.col));
@@ -215,11 +215,7 @@ class Spot {
     const el = document.createElement("span");
     el.className = "indexingNumber";
     el.classList.add(type);
-    el.innerHTML = number;
+    el.innerText = number;
     return el;
-  }
-
-  toString() {
-    return `${this.objectType || null} (${this.row}, ${this.col})`;
   }
 }

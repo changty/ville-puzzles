@@ -1,6 +1,8 @@
 const defaultOptions = {
+  "str-answer-label": "Vastauksesi:",
   "str-check-answer": "Tarkista",
   "str-send-answer": "Lähetä",
+  "str-answer-sent": "Vastaus lähetetty!",
   "str-select": "Valitse",
   "str-erase": "Poista"
 };
@@ -29,14 +31,23 @@ export class BasePuzzle {
   onSubmit() {}
 
   sendAnswer(callback) {
-    const answer = JSON.stringify(this.state.answer);
-    window.alert(`Vastaus ${answer} lähetetty!`);
+    window.alert(this.options["str-answer-sent"]);
+
+    // TODO: Actually send "completeAnswer" to server
+    const completeAnswer = JSON.stringify({
+      setting: this.setting,
+      options: this.options,
+      answer: this.state.answer
+    });
+
+    // eslint-disable-next-line no-console
+    console.log("Complete answer:", completeAnswer);
+
     this.setState({ answerSent: true }, callback);
   }
 
   setup() {
     this.parentEl = document.querySelector(this.elementSelectors.parent);
-
     this.renderHTML();
   }
 

@@ -19,8 +19,7 @@ const defaultOptions = {
   },
   "str-example-label": "Siis esim..",
   "str-ciphertext-label": "Vastaanotettu viesti:",
-  "str-question": "Mikä oli viesti?",
-  "str-answer-label": "Vastauksesi:"
+  "str-question": "Mikä oli viesti?"
 };
 
 export class Puzzle1 extends BasePuzzle {

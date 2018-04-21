@@ -33,12 +33,12 @@ function init() {
 
   const puzzleQuestions = [
     "Kirjoita tai klikkaa missä puunkanto sijaitsee.",
-    "Majavan talo sijaitsee neljä askelta sienen alapuolella ja siitä kaksi askelta oikealle. <strong>Missä rivissä ja sarakkeessa Majavan talo sijaitsee?</strong>"
+    "Majavan talo sijaitsee neljä askelta sienen alapuolella ja siitä kaksi askelta oikealle. Missä rivissä ja sarakkeessa Majavan talo sijaitsee?"
   ];
 
-  const puzzleOptions = {
-    "str-question": randomChoice(puzzleQuestions)
-  };
+  puzzleSetting.question = randomChoice(puzzleQuestions);
+
+  const puzzleOptions = {};
 
   return new Puzzle2(puzzleSetting, puzzleOptions);
 }
