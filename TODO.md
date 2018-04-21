@@ -8,9 +8,7 @@
 
 ### Puzzle 3
 
-* implementointi yms.
 * tyylittely
-* parametreissa kaikki URL:na + mime
 * vaihda päittäin jos vetää uuden objektin vanhan päälle
 
 ### Muuta
