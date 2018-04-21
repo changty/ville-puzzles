@@ -54,7 +54,6 @@ export class Puzzle3 extends BasePuzzle {
 
   onAnswerChange() {
     if (!this.canEditAnswer()) return;
-    if (!this.canSubmit()) return;
     const answer = this.slots.map(s => ({
       slot: s.id,
       draggable: s.draggable ? s.draggable.id : null
@@ -68,13 +67,13 @@ export class Puzzle3 extends BasePuzzle {
   }
 
   canSubmit() {
-    const { submitted } = this.state;
-    return !submitted;
+    const { answer, submitted } = this.state;
+    return !submitted && answer.length > 0;
   }
 
   canSend() {
-    const { answerSent } = this.state;
-    return !answerSent;
+    const { answerSent, submitted } = this.state;
+    return submitted && !answerSent;
   }
 
   updateView() {
