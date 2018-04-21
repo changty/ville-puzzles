@@ -1,5 +1,4 @@
 const defaultOptions = {
-  "str-your-answer": "Vastauksesi",
   "str-check-answer": "Tarkista",
   "str-send-answer": "Lähetä",
   "str-select": "Valitse",

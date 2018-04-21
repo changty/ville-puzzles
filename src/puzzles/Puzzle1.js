@@ -32,19 +32,15 @@ export class Puzzle1 extends BasePuzzle {
     super(Object.assign(defaultOptions, options));
 
     this.setting = setting;
-    this.cipher = makeCipherer(setting);
-    this.ringRotationControl = 0;
-    this.ringDegreePerChar = 360 / setting.characterSet.length;
+    this.cipherer = new Cipherer(this.setting.characterSet, this.setting.key);
 
-    this.state = {
-      answer: "",
-      check: [],
+    this.state = Object.assign(this.state, {
+      answerCheck: [],
       currentCharIdx: 0,
-      done: false,
       ringRotation: 0,
       selectedCharIdx: 0,
       submitted: false
-    };
+    });
 
     this.setup();
   }
@@ -58,23 +54,12 @@ export class Puzzle1 extends BasePuzzle {
     document.onkeydown = null;
   }
 
-  checkAnswer(cipherText, answer) {
-    return answer
-      .toUpperCase()
-      .split("")
-      .map((c, idx) => this.checkCharacter(cipherText[idx], c));
-  }
-
-  checkCharacter(cipherChar, answerChar) {
-    return cipherChar && answerChar && cipherChar === this.cipher(answerChar);
-  }
-
   onSubmit() {
     if (!this.canSubmit()) return;
     const { answer } = this.state;
     const { cipherText } = this.setting;
-    const check = this.checkAnswer(cipherText, answer);
-    this.setState({ check, submitted: true });
+    const answerCheck = this.cipherer.checkMessage(cipherText, answer);
+    this.setState({ answerCheck, submitted: true });
   }
 
   onSendAnswer() {
@@ -203,23 +188,20 @@ export class Puzzle1 extends BasePuzzle {
 
   updateRing() {
     const { ringRotation, selectedCharIdx } = this.state;
-    const rotation = ringRotation * this.ringDegreePerChar;
+    const rotation = this.getRingRotation(ringRotation);
 
     // Update rotation
-    const el = document.querySelector("#puzzleRing #ringWrapper #characters");
+    const el = document.querySelector("#puzzleRing #characters");
     setVendorStyle(el, "transform", `rotateY(${-rotation}deg)`);
 
     // Update selected class
     // Use setTimeout so the class is set somewhat in sync with the animation
     setTimeout(() => {
       document
-        .querySelectorAll("#puzzleRing #ringWrapper #characters .characterSet")
-        .forEach((el, idx) => {
-          if (idx === selectedCharIdx) {
-            el.classList.add("current-char");
-          } else {
-            el.classList.remove("current-char");
-          }
+        .querySelectorAll("#puzzleRing #characters .characterSet")
+        .forEach((c, idx) => {
+          if (idx === selectedCharIdx) c.classList.add("current-char");
+          else c.classList.remove("current-char");
         });
     }, 60);
   }
@@ -246,26 +228,12 @@ export class Puzzle1 extends BasePuzzle {
   renderHTML() {
     super.renderHTML();
 
-    this.renderElement("p", "puzzleDescription", [
-      document.createTextNode(this.options["str-description"]),
-      document.createElement("br"),
-      document.createTextNode(
-        this.options["str-key-descriptions"][this.setting.key]
-      ),
-      document.createElement("br"),
-      document.createTextNode(this.options["str-example-label"]),
-      document.createTextNode(" "),
-      document.createTextNode(this.setting.keyExample)
-    ]);
-
+    this.renderElement("p", "puzzleDescription", this.renderDescription());
     this.renderElement("p", "puzzleQuestion", this.renderQuestion());
-
     this.renderElement("div", "puzzleRing", this.renderCipherRing());
-
-    // Render answer
     this.renderElement("p", "puzzleAnswer", this.renderAnswer());
 
-    // Render "Tarkista"-button
+    // "Tarkista"-button
     this.submitButton = this.renderElement(
       "button",
       "puzzleSubmit",
@@ -274,7 +242,7 @@ export class Puzzle1 extends BasePuzzle {
     this.submitButton.onclick = this.onSubmit.bind(this);
     this.submitButton.disabled = true;
 
-    // Render "Lähetä"-button
+    // "Lähetä"-button
     this.sendAnswerButton = this.renderElement(
       "button",
       "puzzleSend",
@@ -284,6 +252,19 @@ export class Puzzle1 extends BasePuzzle {
     this.sendAnswerButton.disabled = true;
 
     this.updateView();
+  }
+
+  renderDescription() {
+    const { key, keyExample } = this.setting;
+    return [
+      document.createTextNode(this.options["str-description"]),
+      document.createElement("br"),
+      document.createTextNode(this.options["str-key-descriptions"][key]),
+      document.createElement("br"),
+      document.createTextNode(this.options["str-example-label"]),
+      document.createTextNode(" "),
+      document.createTextNode(keyExample)
+    ];
   }
 
   renderQuestion() {
@@ -311,7 +292,7 @@ export class Puzzle1 extends BasePuzzle {
   }
 
   renderAnswer() {
-    const { answer, check, submitted } = this.state;
+    const { answer, answerCheck, submitted } = this.state;
 
     const labelText = document.createTextNode(this.options["str-answer-label"]);
 
@@ -319,7 +300,7 @@ export class Puzzle1 extends BasePuzzle {
 
     const chars = answer.split("").map((c, idx) => {
       const el = document.createElement("span");
-      el.classList.add(check[idx] ? "correct" : "incorrect");
+      el.classList.add(answerCheck[idx] ? "correct" : "incorrect");
       el.innerText = c;
       return el;
     });
@@ -335,7 +316,7 @@ export class Puzzle1 extends BasePuzzle {
     const radius = 300;
 
     const chars = characterSet.split("").map((c, idx) => {
-      const rotation = idx * this.ringDegreePerChar;
+      const rotation = this.getRingRotation(idx);
       const el = document.createElement("li");
       el.classList.add("characterSet");
       el.innerText = c;
@@ -385,31 +366,48 @@ export class Puzzle1 extends BasePuzzle {
 
     return [ringWrapper, controls];
   }
+
+  getRingRotation(index) {
+    return index * (360 / this.setting.characterSet.length);
+  }
 }
 
-export function makeCipherer({ characterSet, key }) {
-  const keys = /([+-])(\d+)/g.exec(key);
-  const factor = keys[1] === "-" ? -parseInt(keys[2]) : parseInt(keys[2]);
-
-  function cipherChar(c) {
-    if (characterSet.indexOf(c) === -1) return c;
-    let idx = characterSet.indexOf(c) + factor;
-    if (idx < 0) idx += characterSet.length;
-    else if (idx > characterSet.length - 1) idx -= characterSet.length;
-    return characterSet[idx];
+export class Cipherer {
+  constructor(characterSet, key) {
+    const keys = /([+-])(\d+)/g.exec(key);
+    this.factor = keys[1] === "-" ? -parseInt(keys[2]) : parseInt(keys[2]);
+    this.characterSet = characterSet;
   }
 
-  return function cipherer(message) {
-    if (typeof message === "string") {
-      if (message.length === 1) {
-        return cipherChar(message.toUpperCase());
-      } else {
-        return message
-          .toUpperCase()
-          .split("")
-          .map(cipherChar)
-          .join("");
-      }
+  cipherChar(c) {
+    if (this.characterSet.indexOf(c) === -1) return c;
+    let idx = this.characterSet.indexOf(c) + this.factor;
+    if (idx < 0) idx += this.characterSet.length;
+    else if (idx > this.characterSet.length - 1)
+      idx -= this.characterSet.length;
+    return this.characterSet[idx];
+  }
+
+  cipherMessage(m) {
+    if (typeof m === "string") {
+      return m
+        .toUpperCase()
+        .split("")
+        .map(this.cipherChar.bind(this))
+        .join("");
     }
-  };
+  }
+
+  checkCharacter(cipherChar, charToCheck) {
+    return (
+      cipherChar && charToCheck && cipherChar === this.cipherChar(charToCheck)
+    );
+  }
+
+  checkMessage(cipherText, message) {
+    return message
+      .toUpperCase()
+      .split("")
+      .map((c, idx) => this.checkCharacter(cipherText[idx], c));
+  }
 }

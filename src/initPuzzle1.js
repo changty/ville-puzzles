@@ -1,5 +1,5 @@
 import { randomChoice } from "./lib/util";
-import { Puzzle1, makeCipherer } from "./puzzles";
+import { Puzzle1, Cipherer } from "./puzzles";
 
 function init() {
   const characterSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ";
@@ -28,7 +28,8 @@ function init() {
 
   const possibleMessages = ["HEI MAAILMA", "JS ROKKAA", "YLIOPISTO ON PARAS"];
 
-  puzzleSetting.cipherText = makeCipherer(puzzleSetting)(
+  const cipherer = new Cipherer(puzzleSetting.characterSet, puzzleSetting.key);
+  puzzleSetting.cipherText = cipherer.cipherMessage(
     randomChoice(possibleMessages)
   );
 
