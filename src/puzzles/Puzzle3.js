@@ -16,28 +16,16 @@ export class Puzzle3 extends BasePuzzle {
 
     this.setting = setting;
 
-    this.state.submitted = false;
+    this.state = Object.assign(this.state, {
+      answerCheck: [],
+      submitted: false
+    });
 
-    this.slots = this.setting.slots.map(s => new Slot(20, s));
+    this.slots = this.setting.slots.map(
+      s => new Slot(s, { onChange: this.onAnswerChange.bind(this) })
+    );
 
-    const draggables = [
-      { type: "image/png", content: "https://picsum.photos/200/100/?random" },
-      { type: "image/png", content: "https://picsum.photos/200/200/?random" },
-      { type: "image/png", content: "https://picsum.photos/100/100/?random" },
-      {
-        type: "video/youtube",
-        content: "https://www.youtube.com/embed/tgbNymZ7vqY"
-      },
-      { type: "text/plain", content: "Drag me 1" },
-      { type: "text/plain", content: "Drag me 2" },
-      { type: "text/plain", content: "Drag me 3 very long text" }
-      // <embed width="420" height="315" src="https://www.youtube.com/embed/tgbNymZ7vqY">
-    ];
-
-    this.draggables = draggables.map((o, i) => new Draggable(o, i));
-
-    // this.html.description = this.options["str-description"];
-    // this.html.question = this.options["str-question"];
+    this.draggables = this.setting.draggables.map(d => new Draggable(d));
 
     this.setup();
   }
@@ -53,16 +41,30 @@ export class Puzzle3 extends BasePuzzle {
     window.onresize = null;
   }
 
-  checkAnswer() {}
-
   onSubmit() {
     if (!this.canSubmit()) return;
-    this.setState({ submitted: true });
+    const answerCheck = this.slots.map(s => s.check());
+    this.setState({ answerCheck, submitted: true });
   }
 
   onSendAnswer() {
     if (!this.canSend()) return;
     this.sendAnswer();
+  }
+
+  onAnswerChange() {
+    if (!this.canEditAnswer()) return;
+    if (!this.canSubmit()) return;
+    const answer = this.slots.map(s => ({
+      slot: s.id,
+      draggable: s.draggable ? s.draggable.id : null
+    }));
+    this.setState({ answer });
+  }
+
+  canEditAnswer() {
+    const { answerSent } = this.state;
+    return !answerSent;
   }
 
   canSubmit() {
@@ -78,7 +80,6 @@ export class Puzzle3 extends BasePuzzle {
   updateView() {
     super.updateView();
 
-    // this.updateAnswer();
     this.updateButtons();
   }
 
@@ -86,8 +87,6 @@ export class Puzzle3 extends BasePuzzle {
     this.submitButton.disabled = !this.canSubmit();
     this.sendAnswerButton.disabled = !this.canSend();
   }
-
-  updateBackground() {}
 
   updateSlotPositions(imageEl) {
     const widthRatio = imageEl.offsetWidth / imageEl.naturalWidth;
@@ -156,9 +155,13 @@ export class Puzzle3 extends BasePuzzle {
 }
 
 class Slot {
-  constructor(size, position) {
-    this.size = size;
-    this.position = position;
+  constructor({ id, correctDraggable, top, left }, { onChange }) {
+    this.id = id;
+    this.correctDraggable = correctDraggable;
+    this.position = { top, left };
+    this.size = 20;
+
+    this.onDraggableChange = onChange;
 
     this.draggable = null;
 
@@ -173,8 +176,16 @@ class Slot {
     this.el.ondragleave = this.onDragLeave.bind(this);
   }
 
+  check() {
+    return (
+      !this.correctDraggable ||
+      (!!this.draggable && this.correctDraggable === this.draggable.id)
+    );
+  }
+
   setDraggable(newDraggable) {
     this.draggable = newDraggable;
+    this.onDraggableChange();
   }
 
   setPosition({ widthRatio = 1, heightRatio = 1 }) {
@@ -214,15 +225,14 @@ class Slot {
 }
 
 class Draggable {
-  constructor(options, idx) {
+  constructor({ id, type, content }) {
+    this.id = id;
+    this.type = type;
+    this.content = content;
+
     this.slot = null;
 
-    this.el = document.createElement("div");
-
-    this.el.id = `draggable-${idx}`;
-    this.el.className = "draggable";
-
-    this.el.appendChild(this.renderContent(options));
+    this.el = this.renderElement();
 
     this.el.draggable = true;
     this.el.ondragstart = this.onDragStart.bind(this);
@@ -231,34 +241,41 @@ class Draggable {
     this.el.Draggable = this;
   }
 
-  renderContent(options) {
-    const { type, content } = options;
+  renderElement() {
+    const el = document.createElement("div");
+    el.id = `draggable-${this.id}`;
+    el.className = "draggable";
+    el.appendChild(this.renderContent(el));
+    return el;
+  }
+
+  renderContent(parentEl) {
     let el;
-    switch (type.split("/")[0]) {
+    switch (this.type.split("/")[0]) {
       case "image":
-        this.el.classList.add("loading");
+        parentEl.classList.add("loading");
         el = document.createElement("img");
-        el.src = content;
+        el.src = this.content;
         el.onload = () => {
-          this.el.classList.remove("loading");
+          parentEl.classList.remove("loading");
         };
         break;
       case "video":
-        this.el.classList.add("loading");
+        parentEl.classList.add("loading");
         el = document.createElement("embed");
-        el.src = content;
+        el.src = this.content;
         el.width = 200 + "px";
         el.height = 100 + "px";
         el.onload = () => {
-          this.el.classList.remove("loading");
+          parentEl.classList.remove("loading");
         };
-        this.el.classList.add("extra-space");
+        parentEl.classList.add("extra-space");
         break;
       case "text":
         el = document.createElement("p");
-        this.el.style.minWidth = 100 + "px";
-        this.el.style.padding = 4 + "px";
-        el.innerHTML = content;
+        parentEl.style.minWidth = 100 + "px";
+        parentEl.style.padding = 4 + "px";
+        el.innerText = this.content;
         break;
       default:
         el = document.createElement("p");

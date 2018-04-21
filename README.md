@@ -42,3 +42,9 @@ CSS files can be imported directly in the Javascript. All CSS will be automatica
 List of supported browsers can be found in the `package.json` file under the `browserslist` key. The project uses [browserslist](https://github.com/ai/browserslist) to parse the supported browsers from that key.
 
 The source code will be transpiled to be compatible with the listed browsers.
+
+**Important**:
+Puzzle 3 contains atleast two XSS vulnerability:
+
+* `setting.backgroundUrl` is used as a source URL for the background image and can point to anywhere
+* `setting.draggables[].content` is used as a source URL and can point to anywhere
