@@ -6,7 +6,12 @@ import "./Puzzle2.css";
 const defaultOptions = {
   "str-name": "Majavakartta",
   "str-description":
-    "Majavakartassa esineen paikka ilmaistaan kahdella suluissa olevalla numerolla. Ensin rivin numero ja sitten sarakkeen numero."
+    "Majavakartassa esineen paikka ilmaistaan kahdella suluissa olevalla numerolla. Ensin rivin numero ja sitten sarakkeen numero.",
+  "str-input-types": {
+    "text-or-mouse": "Anna vastauksesi klikkaamalla tai kirjoittamalla.",
+    "text-only": "Anna vastauksesi kirjoittamalla.",
+    "mouse-only": "Anna vastauksesi klikkaamalla."
+  }
 };
 
 export class Puzzle2 extends BasePuzzle {
@@ -53,6 +58,7 @@ export class Puzzle2 extends BasePuzzle {
   }
 
   onSpotClick(event, spot) {
+    if (this.setting.input === "text-only") return;
     const { row, col } = spot;
     this.onAnswerChange(null, { row, col });
   }
@@ -92,11 +98,11 @@ export class Puzzle2 extends BasePuzzle {
 
     this.rowInput.value = answer.row;
     this.rowInput.disabled =
-      !this.canEditAnswer() || this.setting.input === "mouse";
+      !this.canEditAnswer() || this.setting.input === "mouse-only";
 
     this.colInput.value = answer.col;
     this.colInput.disabled =
-      !this.canEditAnswer() || this.setting.input === "mouse";
+      !this.canEditAnswer() || this.setting.input === "mouse-only";
   }
 
   renderHTML() {
@@ -109,7 +115,13 @@ export class Puzzle2 extends BasePuzzle {
     );
     this.renderElement("div", "puzzleExample", this.renderExamples());
     this.renderElement("div", "puzzleGrid", this.renderGrid());
-    this.renderElement("p", "puzzleQuestion", this.setting.question);
+    this.renderElement("p", "puzzleQuestion", [
+      document.createTextNode(this.setting.question),
+      document.createElement("br"),
+      document.createTextNode(
+        this.options["str-input-types"][this.setting.input]
+      )
+    ]);
     this.renderElement(
       "p",
       "puzzleAnswerLabel",
@@ -157,7 +169,7 @@ export class Puzzle2 extends BasePuzzle {
       i.type = "number";
       i.step = 1;
       i.min = 1;
-      i.disabled = this.setting.input === "mouse";
+      i.disabled = this.setting.input === "mouse-only";
       i.onchange = this.onAnswerChange;
       i.onkeyup = this.onAnswerChange;
     });

@@ -12,7 +12,6 @@ function init() {
         [3, 9, "tree"],
         [9, 6, "treestump"]
       ],
-      input: "mouse", // ("mouse", "text")
       examples: ["Järvi (1, 1)", "Sieni (2, 5)"]
     },
     {
@@ -24,19 +23,21 @@ function init() {
         [2, 9, "tree"],
         [9, 6, "treestump"]
       ],
-      input: "text", // ("mouse", "text")
       examples: ["Järvi (4, 2)", "Sieni (3, 5)"]
     }
   ];
 
   const puzzleSetting = randomChoice(possibleSettings);
 
+  const puzzleInputs = ["text-or-mouse", "text-only", "mouse-only"];
+
   const puzzleQuestions = [
-    "Kirjoita tai klikkaa missä puunkanto sijaitsee.",
+    "Missä puunkanto sijaitsee?",
     "Majavan talo sijaitsee neljä askelta sienen alapuolella ja siitä kaksi askelta oikealle. Missä rivissä ja sarakkeessa Majavan talo sijaitsee?"
   ];
 
   puzzleSetting.question = randomChoice(puzzleQuestions);
+  puzzleSetting.input = randomChoice(puzzleInputs);
 
   const puzzleOptions = {};
 
