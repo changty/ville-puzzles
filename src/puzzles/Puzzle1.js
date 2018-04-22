@@ -410,3 +410,5 @@ export class Cipherer {
       .map((c, idx) => this.checkCharacter(cipherText[idx], c));
   }
 }
+
+window.Puzzle1 = Puzzle1;

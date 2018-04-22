@@ -231,3 +231,5 @@ class Spot {
     return el;
   }
 }
+
+window.Puzzle2 = Puzzle2;

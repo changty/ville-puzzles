@@ -1,5 +1,6 @@
 import { randomChoice } from "./lib/util";
-import { Puzzle2 } from "./puzzles";
+
+const Puzzle2 = window.Puzzle2;
 
 function init() {
   const possibleSettings = [

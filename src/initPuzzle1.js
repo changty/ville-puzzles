@@ -1,5 +1,7 @@
 import { randomChoice } from "./lib/util";
-import { Puzzle1, Cipherer } from "./puzzles";
+import { Cipherer } from "./puzzles/Puzzle1";
+
+const Puzzle1 = window.Puzzle1;
 
 function init() {
   const characterSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ";

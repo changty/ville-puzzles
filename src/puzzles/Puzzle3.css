@@ -39,17 +39,8 @@
   flex-direction: column;
 }
 
-
-#draggables-container > .anchor {
-  position: absolute;
-  top:0;
-  left: 0;
-  cursor: move;
-}
-
 .draggable {
   position: relative;
-  cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -57,11 +48,13 @@
   background-color: white;
   margin: 1px;
   padding: 1px;
+  cursor: move;
 }
 
 .draggable:hover {
   transform: scale(1) !important;
-  border: 1px solid gray
+  border: 1px solid gray;
+  z-index: 2 !important;
 }
 
 .draggable.hide {
@@ -70,18 +63,81 @@
 
 .draggable.in-slot {
   transform: scale(0.25);
+  z-index: 1;
 }
 
 .draggable.loading {
   background: url("../static/ajax-loader.gif") no-repeat 50%;
 }
 
-.draggable.audio-video {
-
+.media-container {
+  min-width: 300px;
+  min-height: 40px;
+  cursor: default;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  cursor: move;
 }
 
-.draggable .anchor{ 
-  position: absolute;
-  top:0;
-  right: 0;
+.media-container .controls {
+  width: 100%;
+  margin: 10px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+}
+
+.media-container .play-pause-button {
+  width: 20px;
+  height: 20px;
+  margin: 0 10px;
+  cursor: pointer;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-position: center center;
+}
+
+.media-container .play-pause-button.play {
+  background-image: url("../static/play-icon.svg");
+}
+
+.media-container .play-pause-button.pause {
+  background-image: url("../static/pause-icon.svg");
+}
+
+.media-container .progress {
+  position: relative;
+  flex-grow: 1;
+  height: 20px;
+  margin-right: 10px;
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  background-size: 50% 100%;
+  background-color: rgb(196, 196, 196);
+  cursor: pointer;
+}
+
+.media-container .progress .progressbar {
+  width: 0;
+  height: 20px;
+  background: rgb(111, 111, 255)
+}
+
+.media-container .expand-button {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.media-container .expand-button.expand {
+  background-image: url("../static/expand-icon.svg");
+}
+
+.media-container .expand-button.contract {
+  background-image: url("../static/contract-icon.svg");
 }

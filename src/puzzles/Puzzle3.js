@@ -1,7 +1,8 @@
 import { BasePuzzle } from "./BasePuzzle";
+import { Clip } from "../lib/Clip";
 
 import "./Puzzle3.css";
-import { CANCELLED } from "dns";
+import { constants } from "zlib";
 
 const defaultOptions = {
   "str-name": "Drag & Drop"
@@ -258,6 +259,7 @@ class Draggable {
     el.id = `draggable-${this.id}`;
     el.className = "draggable";
 
+    el.draggable = true;
     el.ondragstart = this.onDragStart.bind(this);
     el.ondragend = this.onDragEnd.bind(this);
 
@@ -269,16 +271,12 @@ class Draggable {
   renderContent(parentEl) {
     switch (this.type.split("/")[0]) {
       case "text":
-        parentEl.draggable = true;
         return this.renderTextContent(parentEl);
       case "image":
-        parentEl.draggable = true;
         return this.renderImageContent(parentEl);
       case "audio":
-        // Audio requires a more complex dragging logic because of seeking
         return this.renderAudioContent(parentEl);
       case "video":
-        // Video requires a more complex dragging logic because of seeking
         return this.renderVideoContent(parentEl);
       default:
         return document.createTextNode("N/A");
@@ -290,6 +288,9 @@ class Draggable {
     const el = document.createElement("img");
     el.src = this.content;
     el.onload = () => {
+      // To force recalculation of the positions of the slotsS
+      window.dispatchEvent(new Event("resize"));
+
       parentEl.classList.remove("loading");
     };
     return el;
@@ -297,23 +298,19 @@ class Draggable {
 
   renderAudioContent(parentEl) {
     parentEl.classList.add("loading");
-    parentEl.classList.add("audio-video");
 
-    const draggingAnchor = document.createElement("span");
-    draggingAnchor.innerText = "DRAG HERE";
-    draggingAnchor.className = "anchor";
+    const audio = new Clip("audio", this.type, this.content, {
+      oncanplay: () => {
+        // To force recalculation of the positions of the slotsS
+        window.dispatchEvent(new Event("resize"));
 
-    const audio = document.createElement("audio");
-    audio.controls = true;
-    audio.preload = true;
-    audio.src = this.content;
-    audio.type = this.type;
-    audio.oncanplay = () => {
-      parentEl.classList.remove("loading");
-      // parentEl.appendChild(draggingAnchor);
-    };
+        parentEl.classList.remove("loading");
+      }
+    });
 
-    return audio;
+    const el = audio.render();
+
+    return el;
   }
 
   /*
@@ -324,18 +321,19 @@ class Draggable {
    */
   renderVideoContent(parentEl) {
     parentEl.classList.add("loading");
-    parentEl.classList.add("audio-video");
 
-    const video = document.createElement("video");
-    video.controls = true;
-    video.preload = true;
-    video.src = this.content;
-    video.type = this.type;
-    video.width = 300;
-    video.oncanplay = () => {
-      parentEl.classList.remove("loading");
-    };
-    return video;
+    const video = new Clip("video", this.type, this.content, {
+      oncanplay: () => {
+        // To force recalculation of the positions of the slotsS
+        window.dispatchEvent(new Event("resize"));
+
+        parentEl.classList.remove("loading");
+      }
+    });
+
+    const el = video.render();
+
+    return el;
   }
 
   renderTextContent(parentEl) {
@@ -379,12 +377,16 @@ class Draggable {
   onDragEnd() {
     this.el.classList.remove("dragging");
     this.el.classList.remove("hide");
+
+    // To force recalculation of the positions of the slotsS
+    window.dispatchEvent(new Event("resize"));
   }
 
   /*
    * Swap places with other Draggable
    */
   swap(other) {
+    console.log("SWAP", this, other);
     if (!(other instanceof Draggable)) return;
     const otherParent = other.el.parentNode;
     const otherSlot = other.slot;
@@ -397,3 +399,5 @@ class Draggable {
     thisParent.appendChild(other.el);
   }
 }
+
+window.Puzzle3 = Puzzle3;

@@ -1,7 +1,8 @@
 import { randomChoice } from "./lib/util";
-import { Puzzle3 } from "./puzzles";
 
 import finlandImg from "./static/finland-23572_1280.png";
+
+const Puzzle3 = window.Puzzle3;
 
 function init() {
   const possibleSettings = [
@@ -23,7 +24,7 @@ function init() {
           id: 2,
 
           type: "image/png",
-          content: "https://picsum.photos/200/200/?random"
+          content: "https://picsum.photos/300/200/?random"
         },
         {
           id: 3,
