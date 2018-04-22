@@ -1,6 +1,7 @@
 import { BasePuzzle } from "./BasePuzzle";
 
 import "./Puzzle3.css";
+import { CANCELLED } from "dns";
 
 const defaultOptions = {
   "str-name": "Drag & Drop"
@@ -205,13 +206,17 @@ class Slot {
   onDrop(event) {
     event.preventDefault();
     this.el.classList.remove("drag-hover");
-    if (this.draggable) return; // Already occupied
     const id = event.dataTransfer.getData("dragged-id");
     if (!id) return;
     const el = document.getElementById(id);
-    if (!el.Draggable) return;
-    el.Draggable.setSlot(this);
-    this.el.appendChild(el);
+    if (!el.Draggable) return; // Dragging something else than a Draggable
+    if (this.draggable) {
+      // Already occupied
+      this.draggable.swap(el.Draggable);
+    } else {
+      el.Draggable.setSlot(this);
+      this.el.appendChild(el);
+    }
   }
 
   onDragEnter() {
@@ -278,7 +283,7 @@ class Draggable {
         break;
       default:
         el = document.createElement("p");
-        el.innerHTML = "N/A";
+        el.innerText = "N/A";
     }
     return el;
   }
@@ -292,10 +297,16 @@ class Draggable {
       // Moving out of this.slot
       this.slot.setDraggable(null);
     }
+
     if (newSlot) {
       // Moving into newSlot
       newSlot.setDraggable(this);
+      this.el.classList.add("in-slot");
+    } else {
+      // newSlot is null so we are not in a Slot
+      this.el.classList.remove("in-slot");
     }
+
     this.slot = newSlot;
   }
 
@@ -303,7 +314,6 @@ class Draggable {
     event.dataTransfer.setData("dragged-id", this.el.id);
 
     this.el.classList.add("dragging");
-    this.el.classList.remove("in-slot");
 
     setTimeout(() => {
       // Needs to be in a timeout because otherwise element we are dragging
@@ -314,9 +324,22 @@ class Draggable {
 
   onDragEnd() {
     this.el.classList.remove("dragging");
-    if (this.slot) {
-      this.el.classList.add("in-slot");
-    }
     this.el.classList.remove("hide");
+  }
+
+  /*
+   * Swap places with other Draggable
+   */
+  swap(other) {
+    if (!(other instanceof Draggable)) return;
+    const otherParent = other.el.parentNode;
+    const otherSlot = other.slot;
+    const thisParent = this.el.parentNode;
+    const thisSlot = this.slot;
+
+    this.setSlot(otherSlot);
+    otherParent.appendChild(this.el);
+    other.setSlot(thisSlot);
+    thisParent.appendChild(other.el);
   }
 }

@@ -9,10 +9,8 @@
 ### Puzzle 3
 
 * tyylittely
-* vaihda päittäin jos vetää uuden objektin vanhan päälle
 
 ### Muuta
 
 * JSON init
-* XSS on mahdollinen hyökkäysvektori
-* responsiivisuus?
+* Initialisointi paremmin tukemaan selainympäristöä

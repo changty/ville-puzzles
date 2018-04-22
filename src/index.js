@@ -4,7 +4,7 @@ import initPuzzle1 from "./initPuzzle1";
 import initPuzzle2 from "./initPuzzle2";
 import initPuzzle3 from "./initPuzzle3";
 
-// initPuzzle3();
+window.activePuzzle = initPuzzle3();
 
 function activatePuzzle(init) {
   if (window.activePuzzle && window.activePuzzle.cleanUp)
