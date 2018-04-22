@@ -10,6 +10,7 @@
 
 * tyylittely
 * audio ja video draggable
+* lataus ikoni ei näy kuvissa koska ne initialisoidaa niin pieninä
 
 ### Muuta
 
