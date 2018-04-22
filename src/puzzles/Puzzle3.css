@@ -1,7 +1,10 @@
+#wrapper {
+  display: flex;
+  justify-content: left;
+  align-items: center;
+}
 #background {
   position: relative;
-  /* width: 600px; */
-  /* height: 600px; */
   margin-bottom: 20px;
 }
 
@@ -26,37 +29,38 @@
 }
 
 #draggables-container {
-  position: fixed;
-  top: 240px;
-  left: 20px;
-  padding: 10px;
+  margin-left: 20px;
+  padding: 4px;
   border: 1px dashed gray;
-  min-width: 122px;
   min-height: 62px;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  zoom: 50%;
 }
 
-#draggables-container:hover {
-  top: 120px; /* Need to take in account the 50% zoom */
-  zoom: 100%;
+
+#draggables-container > .anchor {
+  position: absolute;
+  top:0;
+  left: 0;
+  cursor: move;
 }
 
 .draggable {
+  position: relative;
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
   border: 1px solid rgb(185, 185, 185);
   background-color: white;
-  zoom: 100%;
   margin: 1px;
+  padding: 1px;
 }
 
 .draggable:hover {
+  transform: scale(1) !important;
   border: 1px solid gray
 }
 
@@ -65,17 +69,19 @@
 }
 
 .draggable.in-slot {
-  zoom: 50%;
-}
-
-.draggable.in-slot:hover {
-  zoom: 100%;
+  transform: scale(0.25);
 }
 
 .draggable.loading {
   background: url("../static/ajax-loader.gif") no-repeat 50%;
 }
 
-.draggable.extra-space {
-  padding: 10px;
+.draggable.audio-video {
+
+}
+
+.draggable .anchor{ 
+  position: absolute;
+  top:0;
+  right: 0;
 }

@@ -11,7 +11,7 @@ function init() {
         { id: 1, correctDraggable: 1, top: 620, left: 390 }, // Oulu
         { id: 2, correctDraggable: 2, top: 1070, left: 280 }, // Tampere
         { id: 3, correctDraggable: 3, top: 1230, left: 340 }, // Helsinki
-        { id: 4, correctDraggable: 5, top: 1190, left: 160 } // Turku
+        { id: 4, correctDraggable: 4, top: 1190, left: 160 } // Turku
       ],
       draggables: [
         {
@@ -31,14 +31,19 @@ function init() {
           type: "image/png",
           content: "https://picsum.photos/100/100/?random"
         },
-        // {
-        //   id: 4,
-        //   type: "video/youtube",
-        //   content: "https://www.youtube.com/embed/tgbNymZ7vqY"
-        // },
-        { id: 5, type: "text/plain", content: "Drag me 1" },
-        { id: 6, type: "text/plain", content: "Drag me 2" },
-        { id: 7, type: "text/plain", content: "Drag me 3 very long text" }
+        { id: 4, type: "text/plain", content: "Drag me 1" },
+        { id: 5, type: "text/plain", content: "Drag me 2" },
+        { id: 6, type: "text/plain", content: "Drag me 3 very long text" },
+        {
+          id: 7,
+          type: "video/ogg",
+          content: "http://clips.vorwaerts-gmbh.de/big_buck_bunny.ogv"
+        },
+        {
+          id: 8,
+          type: "audio/mp3",
+          content: "https://html5tutorial.info/media/vincent.mp3"
+        }
       ]
     }
   ];

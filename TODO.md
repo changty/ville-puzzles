@@ -9,6 +9,7 @@
 ### Puzzle 3
 
 * tyylittely
+* audio ja video draggable
 
 ### Muuta
 

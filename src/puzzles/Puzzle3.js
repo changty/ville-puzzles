@@ -97,12 +97,15 @@ export class Puzzle3 extends BasePuzzle {
   renderHTML() {
     super.renderHTML();
 
-    this.renderElement("div", "background", this.renderBackground());
+    const wrapper = this.renderElement("div", "wrapper", null);
+
+    this.renderElement("div", "background", this.renderBackground(), wrapper);
 
     const draggabblesContainer = this.renderElement(
       "div",
       "draggables-container",
-      this.renderDraggables()
+      this.renderDraggables(),
+      wrapper
     );
 
     draggabblesContainer.ondragover = event => event.preventDefault();
@@ -238,58 +241,109 @@ class Draggable {
 
     this.el = this.renderElement();
 
-    this.el.draggable = true;
+    // this.el.draggable = true;
+
     this.el.ondragstart = this.onDragStart.bind(this);
     this.el.ondragend = this.onDragEnd.bind(this);
 
     this.el.Draggable = this;
   }
 
+  render() {
+    return this.el;
+  }
+
   renderElement() {
     const el = document.createElement("div");
     el.id = `draggable-${this.id}`;
     el.className = "draggable";
+
+    el.ondragstart = this.onDragStart.bind(this);
+    el.ondragend = this.onDragEnd.bind(this);
+
     el.appendChild(this.renderContent(el));
+
     return el;
   }
 
   renderContent(parentEl) {
-    let el;
     switch (this.type.split("/")[0]) {
-      case "image":
-        parentEl.classList.add("loading");
-        el = document.createElement("img");
-        el.src = this.content;
-        el.onload = () => {
-          parentEl.classList.remove("loading");
-        };
-        break;
-      case "video":
-        parentEl.classList.add("loading");
-        el = document.createElement("embed");
-        el.src = this.content;
-        el.width = 200 + "px";
-        el.height = 100 + "px";
-        el.onload = () => {
-          parentEl.classList.remove("loading");
-        };
-        parentEl.classList.add("extra-space");
-        break;
       case "text":
-        el = document.createElement("p");
-        parentEl.style.minWidth = 100 + "px";
-        parentEl.style.padding = 4 + "px";
-        el.innerText = this.content;
-        break;
+        parentEl.draggable = true;
+        return this.renderTextContent(parentEl);
+      case "image":
+        parentEl.draggable = true;
+        return this.renderImageContent(parentEl);
+      case "audio":
+        // Audio requires a more complex dragging logic because of seeking
+        return this.renderAudioContent(parentEl);
+      case "video":
+        // Video requires a more complex dragging logic because of seeking
+        return this.renderVideoContent(parentEl);
       default:
-        el = document.createElement("p");
-        el.innerText = "N/A";
+        return document.createTextNode("N/A");
     }
+  }
+
+  renderImageContent(parentEl) {
+    parentEl.classList.add("loading");
+    const el = document.createElement("img");
+    el.src = this.content;
+    el.onload = () => {
+      parentEl.classList.remove("loading");
+    };
     return el;
   }
 
-  render() {
-    return this.el;
+  renderAudioContent(parentEl) {
+    parentEl.classList.add("loading");
+    parentEl.classList.add("audio-video");
+
+    const draggingAnchor = document.createElement("span");
+    draggingAnchor.innerText = "DRAG HERE";
+    draggingAnchor.className = "anchor";
+
+    const audio = document.createElement("audio");
+    audio.controls = true;
+    audio.preload = true;
+    audio.src = this.content;
+    audio.type = this.type;
+    audio.oncanplay = () => {
+      parentEl.classList.remove("loading");
+      // parentEl.appendChild(draggingAnchor);
+    };
+
+    return audio;
+  }
+
+  /*
+   * Only direct URL to a video file is supported.
+   * Youtube and Vimeo for example require the use of iframe to play content.
+   * This can be circumvented by using a paid account. 
+   * So they are not supported.
+   */
+  renderVideoContent(parentEl) {
+    parentEl.classList.add("loading");
+    parentEl.classList.add("audio-video");
+
+    const video = document.createElement("video");
+    video.controls = true;
+    video.preload = true;
+    video.src = this.content;
+    video.type = this.type;
+    video.width = 300;
+    video.oncanplay = () => {
+      parentEl.classList.remove("loading");
+    };
+    return video;
+  }
+
+  renderTextContent(parentEl) {
+    parentEl.style.minWidth = 100 + "px";
+    parentEl.style.padding = 4 + "px";
+    const el = document.createElement("p");
+    el.innerText = this.content;
+    return el;
   }
 
   setSlot(newSlot) {
