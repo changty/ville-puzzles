@@ -13,5 +13,4 @@
 
 ### Muuta
 
-* JSON init
-* Initialisointi paremmin tukemaan selainympäristöä
+* Vastausten lähetys?

@@ -2,21 +2,13 @@ import { BasePuzzle } from "./BasePuzzle";
 import { Clip } from "../lib/Clip";
 
 import "./Puzzle3.css";
-import { constants } from "zlib";
-
-const defaultOptions = {
-  "str-name": "Drag & Drop"
-};
 
 export class Puzzle3 extends BasePuzzle {
-  constructor(setting, options) {
+  constructor(data) {
     /**
-     * @param {object} setting
-     * @param {object} options
+     * @param {object} data
      */
-    super(Object.assign(defaultOptions, options));
-
-    this.setting = setting;
+    super(data);
 
     this.state = Object.assign(this.state, {
       answerCheck: [],
@@ -124,7 +116,7 @@ export class Puzzle3 extends BasePuzzle {
     this.submitButton = this.renderElement(
       "button",
       "puzzleSubmit",
-      this.options["str-check-answer"]
+      this.locale.general["str-check-answer"]
     );
     this.submitButton.onclick = this.onSubmit.bind(this);
     this.submitButton.disabled = true;
@@ -133,7 +125,7 @@ export class Puzzle3 extends BasePuzzle {
     this.sendAnswerButton = this.renderElement(
       "button",
       "puzzleSend",
-      this.options["str-send-answer"]
+      this.locale.general["str-send-answer"]
     );
     this.sendAnswerButton.onclick = this.onSendAnswer.bind(this);
     this.sendAnswerButton.disabled = true;
@@ -386,7 +378,6 @@ class Draggable {
    * Swap places with other Draggable
    */
   swap(other) {
-    console.log("SWAP", this, other);
     if (!(other instanceof Draggable)) return;
     const otherParent = other.el.parentNode;
     const otherSlot = other.slot;

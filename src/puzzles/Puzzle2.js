@@ -3,33 +3,20 @@ import { rowColToIndex, indexToRowCol } from "../lib/util";
 
 import "./Puzzle2.css";
 
-const defaultOptions = {
-  "str-name": "Majavakartta",
-  "str-description":
-    "Majavakartassa esineen paikka ilmaistaan kahdella suluissa olevalla numerolla. Ensin rivin numero ja sitten sarakkeen numero.",
-  "str-input-types": {
-    "text-or-mouse": "Anna vastauksesi klikkaamalla tai kirjoittamalla.",
-    "text-only": "Anna vastauksesi kirjoittamalla.",
-    "mouse-only": "Anna vastauksesi klikkaamalla."
-  }
-};
-
 export class Puzzle2 extends BasePuzzle {
-  constructor(setting, options = {}) {
+  constructor(data) {
     /**
-     * @param {object} options
+     * @param {object} data
      */
 
-    super(Object.assign(defaultOptions, options));
-
-    this.setting = setting;
+    super(data);
 
     this.state = Object.assign(this.state, {
       answer: { row: null, col: null }
     });
 
-    this.indexToRowCol = indexToRowCol.bind(null, setting.cols);
-    this.rowColToIndex = rowColToIndex.bind(null, setting.cols);
+    this.indexToRowCol = indexToRowCol.bind(null, this.setting.cols);
+    this.rowColToIndex = rowColToIndex.bind(null, this.setting.cols);
 
     this.onSpotClick = this.onSpotClick.bind(this);
     this.onAnswerChange = this.onAnswerChange.bind(this);
@@ -111,7 +98,7 @@ export class Puzzle2 extends BasePuzzle {
     this.renderElement(
       "p",
       "puzzleDescription",
-      this.options["str-description"]
+      this.locale.specific["str-description"]
     );
     this.renderElement("div", "puzzleExample", this.renderExamples());
     this.renderElement("div", "puzzleGrid", this.renderGrid());
@@ -119,13 +106,13 @@ export class Puzzle2 extends BasePuzzle {
       document.createTextNode(this.setting.question),
       document.createElement("br"),
       document.createTextNode(
-        this.options["str-input-types"][this.setting.input]
+        this.locale.specific["str-input-types"][this.setting.input]
       )
     ]);
     this.renderElement(
       "p",
       "puzzleAnswerLabel",
-      this.options["str-answer-label"]
+      this.locale.general["str-answer-label"]
     );
     this.renderElement("div", "puzzleInput", this.renderInputForm());
 
@@ -133,7 +120,7 @@ export class Puzzle2 extends BasePuzzle {
     this.sendAnswerButton = this.renderElement(
       "button",
       "puzzleSend",
-      this.options["str-send-answer"]
+      this.locale.general["str-send-answer"]
     );
     this.sendAnswerButton.onclick = this.onSendAnswer.bind(this);
     this.sendAnswerButton.disabled = true;

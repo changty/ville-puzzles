@@ -1,42 +1,27 @@
-const defaultOptions = {
-  "str-answer-label": "Vastauksesi:",
-  "str-check-answer": "Tarkista",
-  "str-send-answer": "Lähetä",
-  "str-answer-sent": "Vastaus lähetetty!",
-  "str-select": "Valitse",
-  "str-erase": "Poista"
-};
-
 export class BasePuzzle {
   /**
-   * @param {object} options
+   * @param {object} data
    */
 
-  constructor(options = {}) {
-    this.options = Object.assign(defaultOptions, options);
+  constructor(data) {
+    this.setting = data.setting;
+    this.locale = data.locale;
 
     this.state = {
       answer: "",
       answerSent: false
     };
-
-    this.elementSelectors = Object.assign(
-      {
-        parent: "#puzzle"
-      },
-      this.options.elementSelectors
-    );
   }
 
   onSubmit() {}
 
   sendAnswer(callback) {
-    window.alert(this.options["str-answer-sent"]);
+    window.alert(this.locale.general["str-answer-sent"]);
 
     // TODO: Actually send "completeAnswer" to server
     const completeAnswer = JSON.stringify({
       setting: this.setting,
-      options: this.options,
+      locale: this.locale,
       answer: this.state.answer
     });
 
@@ -47,7 +32,7 @@ export class BasePuzzle {
   }
 
   setup() {
-    this.parentEl = document.querySelector(this.elementSelectors.parent);
+    this.parentEl = document.querySelector("#puzzle");
     this.renderHTML();
   }
 
@@ -81,7 +66,7 @@ export class BasePuzzle {
 
   renderHTML() {
     this.parentEl.innerHTML = "";
-    this.renderElement("h1", "puzzleName", this.options["str-name"]);
+    this.renderElement("h1", "puzzleName", this.locale.specific["str-name"]);
   }
 
   setState(newState, callback) {

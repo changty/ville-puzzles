@@ -3,35 +3,15 @@ import { setVendorStyle } from "../lib/util";
 
 import "./Puzzle1.css";
 
-const defaultOptions = {
-  "str-name": "Salakirjoitus",
-  "str-description":
-    "Majavat lähettävät tietoa erityistä salakirjoitusavainta käyttäen.",
-  "str-key-descriptions": {
-    "+1":
-      "Jokainen kirjain vaihdetaan aakkosissa yksi askel eteenpäin olevaan kirjaimeen.",
-    "+2":
-      "Jokainen kirjain vaihdetaan aakkosissa kaksi askelta eteenpäin olevaan kirjaimeen.",
-    "-1":
-      "Jokainen kirjain vaihdetaan aakkosissa yksi askel taaksepäin olevaan kirjaimeen.",
-    "-2":
-      "Jokainen kirjain vaihdetaan aakkosissa kaksi askelta taaksepäin olevaan kirjaimeen."
-  },
-  "str-example-label": "Siis esim..",
-  "str-ciphertext-label": "Vastaanotettu viesti:",
-  "str-question": "Mikä oli viesti?"
-};
-
 export class Puzzle1 extends BasePuzzle {
-  constructor(setting, options = {}) {
+  constructor(data) {
     /**
-     * @param {object} setting
-     * @param {object} options
+     * @param {object} data
      */
-    super(Object.assign(defaultOptions, options));
+    super(data);
 
-    this.setting = setting;
     this.cipherer = new Cipherer(this.setting.characterSet, this.setting.key);
+    this.setting.key = this.cipherer.factor;
 
     this.state = Object.assign(this.state, {
       answerCheck: [],
@@ -236,7 +216,7 @@ export class Puzzle1 extends BasePuzzle {
     this.submitButton = this.renderElement(
       "button",
       "puzzleSubmit",
-      this.options["str-check-answer"]
+      this.locale.general["str-check-answer"]
     );
     this.submitButton.onclick = this.onSubmit.bind(this);
     this.submitButton.disabled = true;
@@ -245,7 +225,7 @@ export class Puzzle1 extends BasePuzzle {
     this.sendAnswerButton = this.renderElement(
       "button",
       "puzzleSend",
-      this.options["str-send-answer"]
+      this.locale.general["str-send-answer"]
     );
     this.sendAnswerButton.onclick = this.onSendAnswer.bind(this);
     this.sendAnswerButton.disabled = true;
@@ -254,15 +234,14 @@ export class Puzzle1 extends BasePuzzle {
   }
 
   renderDescription() {
-    const { key, keyExample } = this.setting;
     return [
-      document.createTextNode(this.options["str-description"]),
+      document.createTextNode(this.locale.specific["str-description"]),
       document.createElement("br"),
-      document.createTextNode(this.options["str-key-descriptions"][key]),
+      document.createTextNode(this.locale.specific["str-key-description"]),
       document.createElement("br"),
-      document.createTextNode(this.options["str-example-label"]),
+      document.createTextNode(this.locale.specific["str-example-label"]),
       document.createTextNode(" "),
-      document.createTextNode(keyExample)
+      document.createTextNode(this.renderExample())
     ];
   }
 
@@ -271,7 +250,7 @@ export class Puzzle1 extends BasePuzzle {
     const { cipherText } = this.setting;
 
     const labelText = document.createTextNode(
-      this.options["str-ciphertext-label"]
+      this.locale.specific["str-ciphertext-label"]
     );
 
     const label = [labelText, document.createTextNode(" ")];
@@ -285,15 +264,27 @@ export class Puzzle1 extends BasePuzzle {
     });
 
     const questionEl = document.createElement("strong");
-    questionEl.innerText = this.options["str-question"];
+    questionEl.innerText = this.locale.specific["str-question"];
 
     return [label, chars, document.createElement("br"), questionEl];
+  }
+
+  renderExample() {
+    const { key, characterSet: cs } = this.setting;
+    const len = cs.length;
+    return [0, 1, len - 2, len - 1]
+      .map(
+        i => `${cs[rotatingIndex(len, i)]} → ${cs[rotatingIndex(len, i + key)]}`
+      )
+      .join(",");
   }
 
   renderAnswer() {
     const { answer, answerCheck, submitted } = this.state;
 
-    const labelText = document.createTextNode(this.options["str-answer-label"]);
+    const labelText = document.createTextNode(
+      this.locale.general["str-answer-label"]
+    );
 
     const label = [labelText, document.createTextNode(" ")];
 
@@ -334,7 +325,7 @@ export class Puzzle1 extends BasePuzzle {
     const eraseButton = this.renderElement(
       "button",
       "eraseButton",
-      this.options["str-erase"],
+      this.locale.general["str-erase"],
       null
     );
     const prevButton = this.renderElement("button", "prevButton", "<<<", null);
@@ -342,7 +333,7 @@ export class Puzzle1 extends BasePuzzle {
     const selectButton = this.renderElement(
       "button",
       "selectButton",
-      this.options["str-select"],
+      this.locale.general["str-select"],
       null
     );
 
@@ -380,10 +371,10 @@ export class Cipherer {
 
   cipherChar(c) {
     if (this.characterSet.indexOf(c) === -1) return c;
-    let idx = this.characterSet.indexOf(c) + this.factor;
-    if (idx < 0) idx += this.characterSet.length;
-    else if (idx > this.characterSet.length - 1)
-      idx -= this.characterSet.length;
+    const idx = rotatingIndex(
+      this.characterSet.length,
+      this.characterSet.indexOf(c) + this.factor
+    );
     return this.characterSet[idx];
   }
 
@@ -409,6 +400,12 @@ export class Cipherer {
       .split("")
       .map((c, idx) => this.checkCharacter(cipherText[idx], c));
   }
+}
+
+function rotatingIndex(arrayLen, index) {
+  if (index >= arrayLen) return index - arrayLen;
+  if (index < 0) return index + arrayLen;
+  return index;
 }
 
 window.Puzzle1 = Puzzle1;
