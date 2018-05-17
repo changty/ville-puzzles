@@ -1,8 +1,7 @@
-/dist
-/temp
-/node_modules
-/.git
-/.cache
-
+dist
+temp
+node_modules
+.git
+.cache
 .gitignore
 wallaby.js
