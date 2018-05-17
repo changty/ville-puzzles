@@ -14,3 +14,4 @@
 ### Muuta
 
 * Vastausten lähetys?
+* Dokumentointi (ainakin settingsien)

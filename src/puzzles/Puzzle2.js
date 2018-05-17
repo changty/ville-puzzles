@@ -3,6 +3,9 @@ import { rowColToIndex, indexToRowCol } from "../lib/util";
 
 import "./Puzzle2.css";
 
+/**
+ * possible input types: text-only, mouse-only, text-or-mouse
+ */
 export class Puzzle2 extends BasePuzzle {
   constructor(data) {
     /**
@@ -106,7 +109,7 @@ export class Puzzle2 extends BasePuzzle {
       document.createTextNode(this.setting.question),
       document.createElement("br"),
       document.createTextNode(
-        this.locale.specific["str-input-types"][this.setting.input]
+        this.locale.specific["str-input-type-description"]
       )
     ]);
     this.renderElement(
