@@ -11,8 +11,7 @@
     "build-puzzle1": "parcel build src/puzzle1.html",
     "build-puzzle2": "parcel build src/puzzle2.html",
     "build-puzzle3": "parcel build src/puzzle3.html",
-    "test":
-      "eslint src/; mocha './src/**/*.test.js' --require babel-core/register"
+    "test": "eslint src/; mocha './src/**/*.test.js' --require babel-core/register"
   },
   "repository": {
     "type": "git",
