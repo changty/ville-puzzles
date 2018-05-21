@@ -9,9 +9,8 @@
 ### Puzzle 3
 
 * tyylittely
-* swap bugi
+* swap bugi?
 
 ### Muuta
 
 * Vastausten lähetys?
-* Dokumentointi (ainakin settingsien)

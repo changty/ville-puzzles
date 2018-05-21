@@ -4,6 +4,17 @@ export class BasePuzzle {
    */
 
   constructor(data) {
+    try {
+      data = JSON.parse(data);
+    } catch (e) {
+      if (e instanceof SyntaxError) {
+        // eslint-disable-next-line no-console
+        console.log(
+          "SyntaxError while parsing settings. Using settings as is."
+        );
+      } else throw e;
+    }
+
     this.setting = data.setting;
     this.locale = data.locale;
 
